@@ -31,21 +31,25 @@ var (
 func main() {
 	fs := flags.ParseFlags(os.Args)
 	log.SetContextExtractor(ctx.ZipkinTraceExtractor{})
-	log.Infof("Starting up %s ...\n", version.Print())
-	log.Infoln(fs.PrintAll())
+	//log.Infof("Starting up %s ...\n", version.Print())
+	//log.Infoln(fs.PrintAll())
 
 	c = conf.Load(fs.ConfigFilePath)
-	log.Infof("config from file and default: %s", c)
+	//log.Infof("config from file and default: %s", c)
 
 	overrideConfWithFlags(c, fs)
 
-	log.Infof("final config, override by command-args: %s", c)
-	log.Infof("==========launch type: \n", c.LaunchType)
+	//log.Infof("final config, override by command-args: %s", c)
+	//log.Infof("==========launch type: \n", c.LaunchType)
 
 	switch c.LaunchType {
 	case "direct":
 		doDirect(c)
 	case "server":
+		log.Infof("Starting up %s ...\n", version.Print())
+		log.Infoln(fs.PrintAll())
+		log.Infof("Final config, override by command-args: %s", c)
+
 		doServer(c)
 	}
 }
@@ -83,13 +87,13 @@ func doDirect(c *conf.Config) {
 func runCmd(c *conf.Config, h string, result *Result) {
 	defer wg.Done()
 	client := bssh.New(h, 22, c.Direct.UserName, c.Direct.Password)
-	log.Infof("+++++++++now run %s on host %s\n", c.Direct.Command, h)
-	log.Infof("client is %s", client)
+	//log.Infof("+++++++++now run %s on host %s\n", c.Direct.Command, h)
+	//log.Infof("client is %s", client)
 	result.err = client.Run(c.Direct.Command)
 	result.result = client.Session.LastResult
 	result.exitCode = client.Session.ExitCode
 
-	log.Infof("++++++result is %s on host %s\n", result.result, h)
+	//log.Infof("++++++result is %s on host %s\n", result.result, h)
 }
 
 func overrideConfWithFlags(c *conf.Config, i flags.CommandLineFlags) {
