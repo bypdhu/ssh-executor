@@ -1,0 +1,17 @@
+launch_type: "server"
+
+server:
+  web:
+    listen_address: "localhost:9888"
+  telemetry:
+    listen_address: "localhost:9889"
+
+#direct:
+#  hosts: "10.99.70.38,10.99.70.35"
+#  hosts_file:
+#  username: "user"
+#  password: "pass"
+#  command: "pwd"
+
+ssh_config:
+  timeout: 30

@@ -1,2 +1,2 @@
 # ssh-executor
-ssh executor written in go.
+ssh executor implement by go.
