@@ -88,10 +88,10 @@ func ParseFlags(args []string) (clfs CommandLineFlags) {
 
 	a.Flag("config.file", "application's configuration file path.").
 			Default("").StringVar(&clfs.ConfigFilePath)
-	a.Flag("launch.type", "server/direct;default direct. server will setup a http server. direct will execute once.").
+	a.Flag("launch.type", "server/direct;default direct. server will setup a http server. direct will execute command once.").
 			Default("direct").StringVar(&clfs.LaunchType)
 	a.Flag("ssh.timeout", "timeout in ssh connection. default 30s.").
-			Default("60").IntVar(&clfs.SshTimeout)
+			Default("30").IntVar(&clfs.SshTimeout)
 	a.Flag("web.listen_address", "[launch.type=server] Address to listen on for UI, API.").
 			Default("").StringVar(&clfs.WebAddress)
 	a.Flag("telemetry.listen_address", "[launch.type=server] Address to listen on for telemetry.").
