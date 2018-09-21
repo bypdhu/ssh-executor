@@ -87,25 +87,25 @@ func ParseFlags(args []string) (clfs CommandLineFlags) {
 	log.AddFlags(a)
 
 	a.Flag("config.file", "application's configuration file path.").
-			Default("").StringVar(&clfs.ConfigFilePath)
+			Default("").Short('c').StringVar(&clfs.ConfigFilePath)
 	a.Flag("launch.type", "server/direct;default direct. server will setup a http server. direct will execute command once.").
-			Default("direct").StringVar(&clfs.LaunchType)
+			Default("direct").Short('T').StringVar(&clfs.LaunchType)
 	a.Flag("ssh.timeout", "timeout in ssh connection. default 30s.").
-			Default("30").IntVar(&clfs.SshTimeout)
+			Default("30").Short('t').IntVar(&clfs.SshTimeout)
 	a.Flag("web.listen_address", "[launch.type=server] Address to listen on for UI, API.").
 			Default("").StringVar(&clfs.WebAddress)
 	a.Flag("telemetry.listen_address", "[launch.type=server] Address to listen on for telemetry.").
 			Default("").StringVar(&clfs.TelemetryAddress)
 	a.Flag("hosts", "[launch.type=direct] Hosts to connect by ssh. Combined by ','. Add hosts.file.").
-			Default("").StringVar(&clfs.Hosts)
+			Default("").Short('i').StringVar(&clfs.Hosts)
 	a.Flag("hosts.file", "[launch.type=direct] File of hosts to connect by ssh. One ip on line. Add hosts.").
-			Default("").StringVar(&clfs.HostsFile)
+			Default("").Short('f').StringVar(&clfs.HostsFile)
 	a.Flag("user.name", "[launch.type=direct] Username for ssh connection.").
-			Default("").StringVar(&clfs.UserName)
+			Default("").Short('u').StringVar(&clfs.UserName)
 	a.Flag("user.pass", "[launch.type=direct] Password for ssh connection.").
-			Default("").StringVar(&clfs.Password)
+			Default("").Short('p').StringVar(&clfs.Password)
 	a.Flag("command", "[launch.type=direct] Command for ssh connection.").
-			Default("").StringVar(&clfs.Command)
+			Default("").Short('C').StringVar(&clfs.Command)
 
 	_, err := a.Parse(args[1:])
 	if err != nil {
