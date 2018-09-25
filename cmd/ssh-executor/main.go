@@ -12,7 +12,7 @@ import (
 
 	"github.com/bypdhu/ssh-executor/cmd/ssh-executor/flags"
 	"github.com/bypdhu/ssh-executor/conf"
-	"github.com/bypdhu/ssh-executor/ssh"
+	"github.com/bypdhu/ssh-executor/bssh"
 	"github.com/bypdhu/ssh-executor/utils"
 )
 
@@ -80,7 +80,7 @@ func doDirect(c *conf.Config) {
 	wg.Wait()
 
 	for _, host := range hosts {
-		fmt.Printf("host:%s, result:%s, exitCode:%s, err:%s\n", host, results[host].result, results[host].exitCode, results[host].err)
+		fmt.Printf("host:%s, result:%s, exitCode:%d, err:%s\n", host, results[host].result, results[host].exitCode, results[host].err)
 	}
 }
 
