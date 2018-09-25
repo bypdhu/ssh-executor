@@ -8,6 +8,9 @@ import (
 	"os/user"
 	"strings"
 	"path/filepath"
+	"crypto/md5"
+	"fmt"
+	"github.com/pkg/errors"
 )
 
 func ReadLine(fileName string) (res []string, err error) {
@@ -71,4 +74,70 @@ func GetFullPath(path string) (fullPath string, err error) {
 		return path, err
 	}
 	return
+}
+
+func _getMd5(f io.Reader) ([]byte, error) {
+	md5Hash := md5.New()
+	if _, err := io.Copy(md5Hash, f); err != nil {
+		return nil, err
+	}
+	return md5Hash.Sum(nil), nil
+}
+
+func GetMd5(f io.Reader) string {
+	if _md5, err := _getMd5(f); err != nil {
+		return ""
+	} else {
+		return fmt.Sprintf("%x", _md5)
+	}
+}
+
+func GetMd5FromPath(path string) (md5string string, err error) {
+	if !IsFile(path) {
+		return "", errors.New(path + " is not a file.")
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	_md5, err := _getMd5(f)
+	if err != nil {
+		return
+	}
+
+	md5string = fmt.Sprintf("%x", _md5)
+	return
+}
+
+// Judge if file or dir exists?
+func Exist(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil || os.IsExist(err)
+	//if err != nil {
+	//	if os.IsExist(err) {
+	//		return true
+	//	}
+	//	return false
+	//}
+	//return true
+}
+
+// Judge if given path is a dir. False if not exist.
+func IsDir(path string) bool {
+	s, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return s.IsDir()
+}
+
+// Judge if given path is a file. False if not exist.
+func IsFile(path string) bool {
+	s, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return !s.IsDir()
 }
