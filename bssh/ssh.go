@@ -2,6 +2,7 @@ package bssh
 
 import (
 	"golang.org/x/crypto/ssh"
+	"fmt"
 )
 
 type SSHCli struct {
@@ -50,7 +51,8 @@ func (c *SSHCli) Run(cmd string) (err error) {
 		}
 		c.Session.ExitCode = -1
 	}
-	c.Session.LastResult = string(buf)
+	c.Session.LastResult = fmt.Sprintf("%s", buf)
+	//c.Session.LastResult = string(buf)
 
 	return
 }

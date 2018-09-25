@@ -12,7 +12,7 @@ func TestConnect(t *testing.T) {
 
 	client := New("10.99.70.38", 22, username, password)
 
-	for _, cmd := range []string{"pwd", "sss", "ps -ef|grep ansible", "ls"} {
+	for _, cmd := range []string{"pwd", "sss", "ps -ef|grep ansible", "md5sum /tmp/bian/测试.txt"} {
 		runCmdTest(client, cmd)
 	}
 }

@@ -13,28 +13,34 @@ func TestSFTPCli_PullFile(t *testing.T) {
 
 	client := NewSftp("10.99.70.38", 22, username, password)
 
-	r := "/tmp/bian/mysql_slow.log"
 	cp, _ := utils.GetFullPath(".")
-	l := cp + "/../tmp/mysql_slow.txt"
-	err := client.CopyOneFile("pull", r, l)
-	if err != nil {
-		fmt.Printf("Error:%s", err)
-	}
 
-}
-func TestSFTPCli_PullFile2(t *testing.T) {
-	username, password := getUser()
-	fmt.Printf("username:%s, password:%s\n", username, password)
+	r := "/tmp/bian/mysql_slow.txt"
+	l := cp + "/../tmp/testdir"
 
-	client := NewSftp("10.99.70.38", 22, username, password)
+	change, err := client.CopyOneFile(SftpPull, r, l)
+	fmt.Printf("Change:%s, Error:%s\n", change, err)
 
-	r := "/tmp/bian/aa.tar.gz"
-	cp, _ := utils.GetFullPath(".")
-	l := cp + "/../tmp/aa.tar.gz"
-	err := client.CopyOneFile("pull", r, l)
-	if err != nil {
-		fmt.Printf("Error:%s", err)
-	}
+	l2 := cp + "/../tmp/mysql_slow.38.txt"
+	change, err = client.CopyOneFile(SftpPull, r, l2)
+	fmt.Printf("Change:%s, Error:%s\n", change, err)
+
+	r3 := "/tmp/bian/aa.tar.gz"
+	l3 := cp + "/../tmp/aa.38.tar.gz"
+
+	change, err = client.CopyOneFile(SftpPull, r3, l3)
+	fmt.Printf("Change:%s, Error:%s\n", change, err)
+
+	client.ForceCopy = true
+
+	change, err = client.CopyOneFile(SftpPull, r3, l3)
+	fmt.Printf("Change:%s, Error:%s\n", change, err)
+
+	r4 := "/tmp/bian/aabb.tar.gz"
+	l4 := cp + "/../tmp/aa.38.tar.gz"
+
+	change, err = client.CopyOneFile(SftpPull, r4, l4)
+	fmt.Printf("Change:%s, Error:%s\n", change, err)
 
 }
 
@@ -44,28 +50,41 @@ func TestSFTPCli_PushFile(t *testing.T) {
 
 	client := NewSftp("10.99.70.38", 22, username, password)
 
-	r := "/tmp/bian/config.yml"
 	cp, _ := utils.GetFullPath(".")
+
+	r := "/tmp/bian/config.copy.yml"
 	l := cp + "/../tmp/config.yml"
 
-	err := client.CopyOneFile("push", l, r)
-	if err != nil {
-		fmt.Printf("Error:%s", err)
-	}
+	change, err := client.CopyOneFile(SftpPush, l, r)
+	fmt.Printf("Change:%s, Error:%s\n", change, err)
+
+	r2 := "/tmp/bian/jumpserver.tar.gz"
+	l2 := cp + "/../tmp/jumpserver.tar.gz"
+
+	change, err = client.CopyOneFile(SftpPush, l2, r2)
+	fmt.Printf("Change:%s, Error:%s\n", change, err)
+
+	client.ForceCopy = true
+	change, err = client.CopyOneFile(SftpPush, l2, r2)
+	fmt.Printf("Change:%s, Error:%s\n", change, err)
+
 }
 
-func TestSFTPCli_PushFile2(t *testing.T) {
+func TestSFTPCli_CopyManyFilesPush(t *testing.T) {
+	cp, _ := utils.GetFullPath(".")
+	srcDests := []*SrcDest{
+		{Src:cp + "/../tmp/config.yml", Dest:"/tmp/bian/config.copy.yml"},
+		{Src:cp + "/../tmp/bb.tar.gz", Dest:"/tmp/bian/bb.copy.tar.gz"},
+		{Src:cp + "/../tmp/mysql_slow.txt", Dest:"/tmp/bian/mysql_slow.copy.txt"},
+	}
+
 	username, password := getUser()
 	fmt.Printf("username:%s, password:%s\n", username, password)
 
 	client := NewSftp("10.99.70.38", 22, username, password)
 
-	r := "/tmp/bian/bb.tar.gz"
-	cp, _ := utils.GetFullPath(".")
-	l := cp + "/../tmp/bb.tar.gz"
-
-	err := client.CopyOneFile("push", l, r)
-	if err != nil {
-		fmt.Printf("Error:%s", err)
-	}
+	fmt.Printf("%v", srcDests)
+	client.CopyManyFiles(SftpPush, srcDests)
+	fmt.Printf("%v", srcDests)
 }
+
