@@ -21,8 +21,8 @@ type SSHConfig struct {
 }
 
 type Server struct {
-	Web       Web       `yaml:"web"`       // when LaunchType=server
-	Telemetry Telemetry `yaml:"telemetry"` // when LaunchType=server
+	Web       Web       `yaml:"web"`
+	Telemetry Telemetry `yaml:"telemetry"`
 }
 
 type Web struct {
@@ -33,12 +33,18 @@ type Telemetry struct {
 }
 
 type Direct struct {
-	Hosts     string `yaml:"hosts"`      // when LaunchType=direct. separate by ","
-	HostsFile string `yaml:"hosts_file"` // when LaunchType=direct. separate by ","
-	UserName  string `yaml:"username"`   // when LaunchType=direct.
-	Password  string `yaml:"password"`   // when LaunchType=direct.
-	Command   string `yaml:"command"`    // when LaunchType=direct.
+	Hosts     string `yaml:"hosts"` // separate by ","
+	HostsFile string `yaml:"hosts_file"`
+	UserName  string `yaml:"username"`
+	Password  string `yaml:"password"`
+	Module    string `yaml:"module"`
+	Command   string `yaml:"command"`
 }
+
+const (
+	LAUNCH_SERVER = "server"
+	LAUNCH_DIRECT = "direct"
+)
 
 var (
 	DefaultConfig = Config{
@@ -47,7 +53,7 @@ var (
 			Telemetry:Telemetry{ListenAddress:"localhost:9889", },
 		},
 		Direct:Direct{},
-		LaunchType:"direct",
+		LaunchType:LAUNCH_DIRECT,
 	}
 	cfg *Config
 	mtx sync.RWMutex
