@@ -65,6 +65,7 @@ func TestIsDir(t *testing.T) {
 	fmt.Println(IsDir(cp))
 	fmt.Println(IsDir(cp + "/../"))
 	fmt.Println(IsDir(cp + "/../tmp"))
+	fmt.Println(IsDir(cp + "/../tmp/testdir"))
 	fmt.Println(IsDir(cp + "/../tmp/config.yml"))
 }
 
