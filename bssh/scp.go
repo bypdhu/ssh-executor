@@ -7,8 +7,10 @@ import (
 	"github.com/pkg/sftp"
 	"github.com/pkg/errors"
 	"github.com/bypdhu/ssh-executor/utils"
+	"fmt"
 )
 
+// Sftp client
 type SFTPCli struct {
 	SSHCli
 	SftpClient *sftp.Client
@@ -19,8 +21,10 @@ type SFTPConfig struct {
 	Md5       string
 	ForceCopy bool
 	BufSize   int
+	IgnoreErr bool // if true, will continue run when copy many files.
 }
 
+// sftp file's src & dest & result
 type SrcDest struct {
 	SrcDestResult
 	Src  string
@@ -28,8 +32,8 @@ type SrcDest struct {
 }
 
 type SrcDestResult struct {
-	Change bool
-	err    error
+	Changed bool
+	err     error
 }
 
 type SftpMode string
@@ -46,6 +50,7 @@ func NewSftp(ip string, port int, username string, password string) (*SFTPCli) {
 	cli.Username = username
 	cli.Password = password
 
+	// SFTPConfig
 	cli.ForceCopy = false
 	cli.BufSize = 1024 * 1024
 
@@ -59,6 +64,40 @@ func (c *SFTPCli) newSftpClient() (err error) {
 		return
 	}
 	return
+}
+
+func (c *SFTPCli) Run(mode SftpMode, srcDests []*SrcDest) error {
+	return c.CopyManyFiles(mode, srcDests)
+}
+
+func (c *SFTPCli) CopyManyFiles(mode SftpMode, srcDests []*SrcDest) error {
+	errsEntity := []*SrcDest{}
+	for _, srcDest := range srcDests {
+		srcDest.Changed, srcDest.err = c.CopyOneFile(mode, srcDest.Src, srcDest.Dest)
+		if srcDest.err != nil {
+			if c.SFTPConfig.IgnoreErr {
+				errsEntity = append(errsEntity, srcDest)
+				continue
+			}
+			return srcDest.err
+		}
+	}
+	if len(errsEntity) != 0 {
+		return getErrorFromSrcDest(errsEntity)
+	}
+	return nil
+}
+
+func getErrorFromSrcDest(sds []*SrcDest) (err error) {
+	s := ""
+	for _, sd := range sds {
+		if sd.err == nil {
+			continue
+		}
+		s += fmt.Sprintf("Copy %s to %s, err %s. \n ", sd.Src, sd.Dest, sd.err)
+	}
+	return errors.New(s)
+
 }
 
 func (c *SFTPCli) CopyOneFile(mode SftpMode, src string, dest string) (change bool, err error) {
@@ -81,19 +120,16 @@ func (c *SFTPCli) CopyOneFile(mode SftpMode, src string, dest string) (change bo
 	return
 }
 
-func (c *SFTPCli) CopyManyFiles(mode SftpMode, srcDests []*SrcDest) {
-	for _, srcDest := range srcDests {
-		srcDest.Change, srcDest.err = c.CopyOneFile(mode, srcDest.Src, srcDest.Dest)
-	}
-}
-
 func (c *SFTPCli) PullFile(remote string, local string) (bool, error) {
+	if utils.IsDir(local) {
+		return false, errors.New(local + " is a dir.")
+	}
 
 	if utils.IsFile(local) && c.ForceCopy == false {
 		l_md5, _ := utils.GetMd5FromPath(local)
 		r_md5, err := getRemoteFileMd5(c, remote)
 		if err != nil {
-			return false, errors.New(err.Error() + ". Detail: " + c.Session.LastResult)
+			return false, errors.New(err.Error() + ". Detail: " + c.Session.Result)
 		}
 		if r_md5 != "" && r_md5 == l_md5 {
 			return false, nil
@@ -120,6 +156,10 @@ func (c *SFTPCli) PullFile(remote string, local string) (bool, error) {
 }
 
 func (c *SFTPCli) PushFile(local string, remote string) (bool, error) {
+	if utils.IsDir(local) {
+		return false, errors.New(local + " is a dir.")
+	}
+
 	l, err := os.Open(local)
 	if err != nil {
 		return false, err

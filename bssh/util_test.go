@@ -12,8 +12,8 @@ func TestGetRemoteFileMd5(t *testing.T) {
 	client := NewSftp("10.99.70.38", 22, username, password)
 
 	m, err := getRemoteFileMd5(client, "/tmp/bian/test.txt")
-	fmt.Printf("md5:%s, err:%s, result:%s", m, err, client.Session.LastResult)
+	fmt.Printf("md5:%s, err:%s, result:%s", m, err, client.Session.Result)
 
 	m, err = getRemoteFileMd5(client, "/tmp/bian/测试.txt")
-	fmt.Printf("md5:%s, err:%s, result:%s", m, err, client.Session.LastResult)
+	fmt.Printf("md5:%s, err:%s, result:%s", m, err, client.Session.Result)
 }

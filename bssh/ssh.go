@@ -11,10 +11,8 @@ type SSHCli struct {
 }
 
 type Session struct {
-	session    *ssh.Session
-	LastCmd    string
-	LastResult string
-	ExitCode   int
+	PerRun
+	session *ssh.Session
 }
 
 func New(ip string, port int, username string, password string) *SSHCli {
@@ -43,7 +41,7 @@ func (c *SSHCli) Run(cmd string) (err error) {
 	defer c.closeSession()
 
 	c.Session.ExitCode = 0
-	c.Session.LastCmd = cmd
+	c.Session.Cmd = cmd
 	buf, err := c.Session.session.CombinedOutput(cmd)
 	if err != nil {
 		if v, ok := err.(*ssh.ExitError); ok {
@@ -51,7 +49,7 @@ func (c *SSHCli) Run(cmd string) (err error) {
 		}
 		c.Session.ExitCode = -1
 	}
-	c.Session.LastResult = fmt.Sprintf("%s", buf)
+	c.Session.Result = fmt.Sprintf("%s", buf)
 	//c.Session.LastResult = string(buf)
 
 	return

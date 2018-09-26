@@ -51,6 +51,6 @@ func TestSSHCli_Run(t *testing.T) {
 func runCmdTest(client *SSHCli, cmd string) {
 	client.Run(cmd)
 	fmt.Printf("Host:%s, cmd:%s, Result:%s, ExitCode:%d\n",
-		fmt.Sprintf("%s:%d", client.Host, client.Port), client.Session.LastCmd, client.Session.LastResult, client.Session.ExitCode)
+		fmt.Sprintf("%s:%d", client.Host, client.Port), client.Session.Cmd, client.Session.Result, client.Session.ExitCode)
 
 }

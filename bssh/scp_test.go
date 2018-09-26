@@ -21,6 +21,9 @@ func TestSFTPCli_PullFile(t *testing.T) {
 	change, err := client.CopyOneFile(SftpPull, r, l)
 	fmt.Printf("Change:%s, Error:%s\n", change, err)
 
+	change, err = client.CopyOneFile(SftpPull, r, l)
+	fmt.Printf("Change:%s, Error:%s\n", change, err)
+
 	l2 := cp + "/../tmp/mysql_slow.38.txt"
 	change, err = client.CopyOneFile(SftpPull, r, l2)
 	fmt.Printf("Change:%s, Error:%s\n", change, err)
@@ -76,6 +79,8 @@ func TestSFTPCli_CopyManyFilesPush(t *testing.T) {
 		{Src:cp + "/../tmp/config.yml", Dest:"/tmp/bian/config.copy.yml"},
 		{Src:cp + "/../tmp/bb.tar.gz", Dest:"/tmp/bian/bb.copy.tar.gz"},
 		{Src:cp + "/../tmp/mysql_slow.txt", Dest:"/tmp/bian/mysql_slow.copy.txt"},
+		{Src:cp + "/../tmp/testdir", Dest:"/tmp/bian/testdir"},
+		{Src:cp + "/../tmp/testdir", Dest:"/tmp/bian/testdir"},
 	}
 
 	username, password := getUser()
@@ -83,8 +88,12 @@ func TestSFTPCli_CopyManyFilesPush(t *testing.T) {
 
 	client := NewSftp("10.99.70.38", 22, username, password)
 
-	fmt.Printf("%v", srcDests)
+	//client.IgnoreErr=true
+
+	fmt.Printf("%s\n", srcDests)
 	client.CopyManyFiles(SftpPush, srcDests)
-	fmt.Printf("%v", srcDests)
+	for _, sd := range srcDests {
+		fmt.Printf("changed:%t, %s\n", sd.Changed, sd.err)
+	}
 }
 
