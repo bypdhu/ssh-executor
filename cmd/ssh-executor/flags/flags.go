@@ -9,6 +9,8 @@ import (
 	"github.com/pkg/errors"
 	"git.eju-inc.com/ops/go-common/version"
 	"git.eju-inc.com/ops/go-common/log"
+	"github.com/bypdhu/ssh-executor/conf"
+	"github.com/bypdhu/ssh-executor/module"
 )
 
 type CommandLineFlags struct {
@@ -23,12 +25,13 @@ type CommandLineFlags struct {
 	HostsFile        string // when LaunchType=direct. One Ip on line.
 	UserName         string // when LaunchType=direct.
 	Password         string // when LaunchType=direct.
+	Module           string // when LaunchType=direct.
 	Command          string // when LaunchType=direct.
 }
 
 func (f *CommandLineFlags) PrintAll() (content string) {
 	switch f.LaunchType {
-	case "server":
+	case conf.LAUNCH_SERVER:
 		content = fmt.Sprintf(
 			`Flags{
 			config.file=%s,
@@ -44,7 +47,7 @@ func (f *CommandLineFlags) PrintAll() (content string) {
 			f.TelemetryAddress,
 			f.SshTimeout,
 		)
-	case "direct":
+	case conf.LAUNCH_DIRECT:
 		content = fmt.Sprintf(
 			`Flags{
 			config.file=%s,
@@ -53,6 +56,8 @@ func (f *CommandLineFlags) PrintAll() (content string) {
 			hosts.file=%s,
 			user.name=%s,
 			user.pass=***,
+			module=%s,
+			command=%s,
 			ssh.timeout=%d,
 			}
 			`,
@@ -61,6 +66,8 @@ func (f *CommandLineFlags) PrintAll() (content string) {
 			f.Hosts,
 			f.HostsFile,
 			f.UserName,
+			f.Module,
+			f.Command,
 			f.SshTimeout,
 		)
 	default:
@@ -89,7 +96,7 @@ func ParseFlags(args []string) (clfs CommandLineFlags) {
 	a.Flag("config.file", "application's configuration file path.").
 			Default("").Short('c').StringVar(&clfs.ConfigFilePath)
 	a.Flag("launch.type", "server/direct;default direct. server will setup a http server. direct will execute command once.").
-			Default("direct").Short('T').StringVar(&clfs.LaunchType)
+			Default(conf.LAUNCH_DIRECT).Short('T').StringVar(&clfs.LaunchType)
 	a.Flag("ssh.timeout", "timeout in ssh connection. default 30s.").
 			Default("30").Short('t').IntVar(&clfs.SshTimeout)
 	a.Flag("web.listen_address", "[launch.type=server] Address to listen on for UI, API.").
@@ -104,7 +111,9 @@ func ParseFlags(args []string) (clfs CommandLineFlags) {
 			Default("").Short('u').StringVar(&clfs.UserName)
 	a.Flag("user.pass", "[launch.type=direct] Password for ssh connection.").
 			Default("").Short('p').StringVar(&clfs.Password)
-	a.Flag("command", "[launch.type=direct] Command for ssh connection.").
+	a.Flag("module", "[launch.type=direct] Module to handle. like 'shell' 'copy' ").
+			Default(module.MODULE_SHELL).Short('m').StringVar(&clfs.Module)
+	a.Flag("command", "[launch.type=direct] Command to handle.").
 			Default("").Short('C').StringVar(&clfs.Command)
 
 	_, err := a.Parse(args[1:])
@@ -114,4 +123,39 @@ func ParseFlags(args []string) (clfs CommandLineFlags) {
 		os.Exit(2)
 	}
 	return
+}
+
+func OverrideConfWithFlags(c *conf.Config, i CommandLineFlags) {
+	c.LaunchType = i.LaunchType
+	c.SSHConfig.Timeout = i.SshTimeout
+
+	switch i.LaunchType {
+	case "direct":
+		if i.Hosts != "" {
+			c.Direct.Hosts = i.Hosts
+		}
+		if i.HostsFile != "" {
+			c.Direct.HostsFile = i.HostsFile
+		}
+		if i.UserName != "" {
+			c.Direct.UserName = i.UserName
+		}
+		if i.Password != "" {
+			c.Direct.Password = i.Password
+		}
+		if i.Module != "" {
+			c.Direct.Module = i.Module
+		}
+		if i.Command != "" {
+			c.Direct.Command = i.Command
+		}
+	case "server":
+		if i.WebAddress != "" {
+			c.Serv.Web.ListenAddress = i.WebAddress
+		}
+		if i.TelemetryAddress != "" {
+			c.Serv.Telemetry.ListenAddress = i.TelemetryAddress
+		}
+	}
+
 }
