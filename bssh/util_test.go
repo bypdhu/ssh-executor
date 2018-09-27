@@ -16,4 +16,7 @@ func TestGetRemoteFileMd5(t *testing.T) {
 
 	m, err = getRemoteFileMd5(client, "/tmp/bian/测试.txt")
 	fmt.Printf("md5:%s, err:%s, result:%s", m, err, client.Session.Result)
+
+	m, err = getRemoteFileMd5(client, "/tmp/bian/")
+	fmt.Printf("md5:%s, err:%s, result:%s", m, err, client.Session.Result)
 }

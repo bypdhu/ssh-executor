@@ -20,12 +20,6 @@ type SSHConfig struct {
 	Timeout int
 }
 
-type PerRun struct {
-	Cmd      string
-	Result   string
-	ExitCode int
-}
-
 func (c *Cli) newClient() (err error) {
 	var (
 		auth []ssh.AuthMethod

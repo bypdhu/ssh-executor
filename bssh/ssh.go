@@ -1,8 +1,10 @@
 package bssh
 
 import (
-	"golang.org/x/crypto/ssh"
 	"fmt"
+	"golang.org/x/crypto/ssh"
+
+	"github.com/bypdhu/ssh-executor/result"
 )
 
 type SSHCli struct {
@@ -11,8 +13,19 @@ type SSHCli struct {
 }
 
 type Session struct {
-	PerRun
+	SSHCommand
 	session *ssh.Session
+}
+
+type SSHCommand struct {
+	result.SSHResult
+	Cmd     string
+	Comment string
+	Args    SSHArgs
+}
+
+type SSHArgs struct {
+
 }
 
 func New(ip string, port int, username string, password string) *SSHCli {

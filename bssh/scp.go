@@ -3,11 +3,12 @@ package bssh
 import (
 	"os"
 	"io"
+	"fmt"
 
 	"github.com/pkg/sftp"
 	"github.com/pkg/errors"
 	"github.com/bypdhu/ssh-executor/utils"
-	"fmt"
+	"github.com/bypdhu/ssh-executor/result"
 )
 
 // Sftp client
@@ -26,14 +27,9 @@ type SFTPConfig struct {
 
 // sftp file's src & dest & result
 type SrcDest struct {
-	SrcDestResult
+	result.SFTPResult
 	Src  string
 	Dest string
-}
-
-type SrcDestResult struct {
-	Changed bool
-	err     error
 }
 
 type SftpMode string
@@ -73,13 +69,13 @@ func (c *SFTPCli) Run(mode SftpMode, srcDests []*SrcDest) error {
 func (c *SFTPCli) CopyManyFiles(mode SftpMode, srcDests []*SrcDest) error {
 	errsEntity := []*SrcDest{}
 	for _, srcDest := range srcDests {
-		srcDest.Changed, srcDest.err = c.CopyOneFile(mode, srcDest.Src, srcDest.Dest)
-		if srcDest.err != nil {
+		srcDest.Changed, srcDest.Err = c.CopyOneFile(mode, srcDest.Src, srcDest.Dest)
+		if srcDest.Err != nil {
 			if c.SFTPConfig.IgnoreErr {
 				errsEntity = append(errsEntity, srcDest)
 				continue
 			}
-			return srcDest.err
+			return srcDest.Err
 		}
 	}
 	if len(errsEntity) != 0 {
@@ -91,13 +87,12 @@ func (c *SFTPCli) CopyManyFiles(mode SftpMode, srcDests []*SrcDest) error {
 func getErrorFromSrcDest(sds []*SrcDest) (err error) {
 	s := ""
 	for _, sd := range sds {
-		if sd.err == nil {
+		if sd.Err == nil {
 			continue
 		}
-		s += fmt.Sprintf("Copy %s to %s, err %s. \n ", sd.Src, sd.Dest, sd.err)
+		s += fmt.Sprintf("Copy %s to %s, err %s. \n ", sd.Src, sd.Dest, sd.Err)
 	}
 	return errors.New(s)
-
 }
 
 func (c *SFTPCli) CopyOneFile(mode SftpMode, src string, dest string) (change bool, err error) {
@@ -122,7 +117,7 @@ func (c *SFTPCli) CopyOneFile(mode SftpMode, src string, dest string) (change bo
 
 func (c *SFTPCli) PullFile(remote string, local string) (bool, error) {
 	if utils.IsDir(local) {
-		return false, errors.New(local + " is a dir.")
+		return false, errors.New("local: " + local + " is a dir.")
 	}
 
 	if utils.IsFile(local) && c.ForceCopy == false {
@@ -157,7 +152,7 @@ func (c *SFTPCli) PullFile(remote string, local string) (bool, error) {
 
 func (c *SFTPCli) PushFile(local string, remote string) (bool, error) {
 	if utils.IsDir(local) {
-		return false, errors.New(local + " is a dir.")
+		return false, errors.New("local: " + local + " is a dir.")
 	}
 
 	l, err := os.Open(local)

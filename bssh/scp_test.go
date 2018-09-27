@@ -88,12 +88,60 @@ func TestSFTPCli_CopyManyFilesPush(t *testing.T) {
 
 	client := NewSftp("10.99.70.38", 22, username, password)
 
-	//client.IgnoreErr=true
+	client.IgnoreErr = true
 
 	fmt.Printf("%s\n", srcDests)
 	client.CopyManyFiles(SftpPush, srcDests)
 	for _, sd := range srcDests {
-		fmt.Printf("changed:%t, %s\n", sd.Changed, sd.err)
+		fmt.Printf("changed:%t, %s\n", sd.Changed, sd.Err)
 	}
 }
 
+func TestSFTPCli_Run_Push(t *testing.T) {
+	cp, _ := utils.GetFullPath(".")
+	srcDests := []*SrcDest{
+		{Src:cp + "/../tmp/config.yml", Dest:"/tmp/bian/config.copy.yml"},
+		{Src:cp + "/../tmp/bb.tar.gz", Dest:"/tmp/bian/bb.copy.tar.gz"},
+		{Src:cp + "/../tmp/testdir", Dest:"/tmp/bian/testdir"},
+		{Src:cp + "/../tmp/mysql_slow.txt", Dest:"/tmp/bian/mysql_slow.copy.txt"},
+		{Src:cp + "/../tmp/testdir", Dest:"/tmp/bian/testdir"},
+	}
+
+	username, password := getUser()
+	fmt.Printf("username:%s, password:%s\n", username, password)
+
+	client := NewSftp("10.99.70.38", 22, username, password)
+
+	client.IgnoreErr = true
+	client.ForceCopy = true
+
+	fmt.Printf("%s\n", srcDests)
+	client.Run(SftpPush, srcDests)
+	for _, sd := range srcDests {
+		fmt.Printf("changed:%t, %s\n", sd.Changed, sd.Err)
+	}
+}
+
+func TestSFTPCli_Run_Pull(t *testing.T) {
+	cp, _ := utils.GetFullPath(".")
+	srcDests := []*SrcDest{
+		{Dest:cp + "/../tmp/config.38.yml", Src:"/tmp/bian/config.yml"},
+		{Dest:cp + "/../tmp/bb.38.tar.gz", Src:"/tmp/bian/bb.tar.gz"},
+		{Dest:cp + "/../tmp/testdir1", Src:"/tmp/bian/"},
+		{Dest:cp + "/../tmp/mysql_slow.38.txt", Src:"/tmp/bian/mysql_slow.txt"},
+	}
+
+	username, password := getUser()
+	fmt.Printf("username:%s, password:%s\n", username, password)
+
+	client := NewSftp("10.99.70.38", 22, username, password)
+
+	client.IgnoreErr = true
+	client.ForceCopy = true
+
+	fmt.Printf("%s\n", srcDests)
+	client.Run(SftpPull, srcDests)
+	for _, sd := range srcDests {
+		fmt.Printf("changed:%t, %s\n", sd.Changed, sd.Err)
+	}
+}
