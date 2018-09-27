@@ -1,9 +1,5 @@
 package result
 
-import (
-	"github.com/bypdhu/ssh-executor/bssh"
-)
-
 type Result struct {
 	Result  string
 	Err     error
@@ -11,7 +7,12 @@ type Result struct {
 }
 
 type SSHResult struct {
-	bssh.PerRun
-	Err error
+	Result   string
+	ExitCode int
+	Err      error
 }
 
+type SFTPResult struct {
+	Changed bool
+	Err     error
+}
