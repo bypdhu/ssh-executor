@@ -1,18 +1,16 @@
 package result
 
-type Result struct {
-	Result  string
-	Err     error
-	Success bool
+type BaseResult struct {
+	SSHResult
+	SFTPResult
+	Err error
 }
 
 type SSHResult struct {
 	Result   string
 	ExitCode int
-	Err      error
 }
 
 type SFTPResult struct {
 	Changed bool
-	Err     error
 }
