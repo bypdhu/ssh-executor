@@ -8,74 +8,69 @@ import (
 	"github.com/pkg/sftp"
 	"github.com/pkg/errors"
 	"github.com/bypdhu/ssh-executor/utils"
-	"github.com/bypdhu/ssh-executor/result"
+	"github.com/bypdhu/ssh-executor/common"
+	"github.com/bypdhu/ssh-executor/task"
+	"strings"
 )
 
 // Sftp client
 type SFTPCli struct {
 	SSHCli
-	SftpClient *sftp.Client
+	sftpClient *sftp.Client
 	SFTPConfig
 }
 
 type SFTPConfig struct {
-	Md5       string
-	ForceCopy bool
-	BufSize   int
-	IgnoreErr bool // if true, will continue run when copy many files.
+	BufSize int
 }
 
-// sftp file's src & dest & result
-type SrcDest struct {
-	result.SFTPResult
-	Src  string
-	Dest string
-}
-
-type SftpMode string
-
-const (
-	SftpPull SftpMode = "PULL"
-	SftpPush SftpMode = "PUSH"
-)
-
-func NewSftp(ip string, port int, username string, password string) (*SFTPCli) {
-	cli := new(SFTPCli)
-	cli.Host = ip
-	cli.Port = port
-	cli.Username = username
-	cli.Password = password
+func NewSftp(ip string, port int, username string, password string) (c *SFTPCli) {
+	c = new(SFTPCli)
+	c.Host = ip
+	c.Port = port
+	c.Username = username
+	c.Password = password
 
 	// SFTPConfig
-	cli.ForceCopy = false
-	cli.BufSize = 1024 * 1024
+	c.BufSize = 1024 * 1024
 
-	return cli
+	if err := c.newSftpClient(); err != nil {
+		return
+	}
+
+	return
 }
 
 func (c *SFTPCli) newSftpClient() (err error) {
-	c.SftpClient, err = sftp.NewClient(c.client)
+	if c.client == nil {
+		if err = c.newClient(); err != nil {
+			return
+		}
+	}
+	c.sftpClient, err = sftp.NewClient(c.client)
 	if err != nil {
-		c.SftpClient = nil
+		c.sftpClient = nil
 		return
 	}
 	return
 }
 
-func (c *SFTPCli) Run(mode SftpMode, srcDests []*SrcDest) error {
-	return c.CopyManyFiles(mode, srcDests)
+func (c *SFTPCli) SftpRun() error {
+	return c.CopyManyFiles()
 }
 
-func (c *SFTPCli) CopyManyFiles(mode SftpMode, srcDests []*SrcDest) error {
-	errsEntity := []*SrcDest{}
-	for _, srcDest := range srcDests {
-		srcDest.Changed, srcDest.Err = c.CopyOneFile(mode, srcDest.Src, srcDest.Dest)
-		if srcDest.Err != nil {
-			if c.SFTPConfig.IgnoreErr {
+func (c *SFTPCli) CopyManyFiles() error {
+	mode := c.SftpMode
+	errsEntity := []*task.CopyOneFile{}
+
+	for _, srcDest := range c.CopyFiles {
+		err := c.CopyOneFile(mode, srcDest)
+		if err != nil {
+			if c.CopyArgs.IgnoreErr {
 				errsEntity = append(errsEntity, srcDest)
 				continue
 			}
-			return srcDest.Err
+			return err
 		}
 	}
 	if len(errsEntity) != 0 {
@@ -84,7 +79,7 @@ func (c *SFTPCli) CopyManyFiles(mode SftpMode, srcDests []*SrcDest) error {
 	return nil
 }
 
-func getErrorFromSrcDest(sds []*SrcDest) (err error) {
+func getErrorFromSrcDest(sds []*task.CopyOneFile) (error) {
 	s := ""
 	for _, sd := range sds {
 		if sd.Err == nil {
@@ -95,43 +90,43 @@ func getErrorFromSrcDest(sds []*SrcDest) (err error) {
 	return errors.New(s)
 }
 
-func (c *SFTPCli) CopyOneFile(mode SftpMode, src string, dest string) (change bool, err error) {
-	if c.client == nil {
-		if err = c.newClient(); err != nil {
-			return
-		}
-	}
-	if c.SftpClient == nil {
+func (c *SFTPCli) CopyOneFile(mode common.SftpMode, one *task.CopyOneFile) (err error) {
+	if c.sftpClient == nil || c.client == nil {
 		if err = c.newSftpClient(); err != nil {
 			return
 		}
 	}
+
 	switch mode {
-	case SftpPull:
-		change, err = c.PullFile(src, dest)
-	case SftpPush:
-		change, err = c.PushFile(src, dest)
+	case common.SFTP_PULL:
+		one.Changed, one.Err = c.PullFile(one)
+	case common.SFTP_PUSH:
+		one.Changed, one.Err = c.PushFile(one)
 	}
+	err = one.Err
 	return
 }
 
-func (c *SFTPCli) PullFile(remote string, local string) (bool, error) {
+func (c *SFTPCli) PullFile(one *task.CopyOneFile) (bool, error) {
+	local := one.Dest
+	remote := one.Src
+
 	if utils.IsDir(local) {
 		return false, errors.New("local: " + local + " is a dir.")
 	}
 
-	if utils.IsFile(local) && c.ForceCopy == false {
+	if utils.IsFile(local) && one.ForceCopy == false {
 		l_md5, _ := utils.GetMd5FromPath(local)
-		r_md5, err := getRemoteFileMd5(c, remote)
+		r_md5, err := c.GetRemoteFileMd5(remote)
 		if err != nil {
-			return false, errors.New(err.Error() + ". Detail: " + c.Session.Result)
+			return false, errors.New(err.Error() + ". Detail: " + c.Result)
 		}
 		if r_md5 != "" && r_md5 == l_md5 {
 			return false, nil
 		}
 	}
 
-	r, err := c.SftpClient.Open(remote)
+	r, err := c.sftpClient.Open(remote)
 	if err != nil {
 		return false, err
 	}
@@ -150,10 +145,28 @@ func (c *SFTPCli) PullFile(remote string, local string) (bool, error) {
 	return true, nil
 }
 
-func (c *SFTPCli) PushFile(local string, remote string) (bool, error) {
+func (c *SFTPCli) PushFile(one *task.CopyOneFile) (bool, error) {
+	local := one.Src
+	remote := one.Dest
+
 	if utils.IsDir(local) {
 		return false, errors.New("local: " + local + " is a dir.")
 	}
+
+	//if one.CreateDirectory {
+	//	base, toCreate := c.GetDirExists(remote)
+	//
+	//	fmt.Printf("base:%s,toCreate:%s\n", base, toCreate)
+	//	if err := c.CreateDirsRemote(one, base, toCreate); err != nil {
+	//		return false, errors.New(err.Error() + ". Detail: " + c.Result)
+	//	}
+	//	if err := c.ChmodRemote(one, base, toCreate); err != nil {
+	//		return false, errors.New(err.Error() + ". Detail: " + c.Result)
+	//	}
+	//	if err := c.ChownRemote(one, base, toCreate); err != nil {
+	//		return false, errors.New(err.Error() + ". Detail: " + c.Result)
+	//	}
+	//}
 
 	l, err := os.Open(local)
 	if err != nil {
@@ -161,19 +174,19 @@ func (c *SFTPCli) PushFile(local string, remote string) (bool, error) {
 	}
 	defer l.Close()
 
-	if c.ForceCopy == false {
+	if one.ForceCopy == false {
 		l_md5, err := utils.GetMd5FromPath(local)
 		if err != nil {
 			return false, err
 		}
-		r_md5, _ := getRemoteFileMd5(c, remote)
+		r_md5, _ := c.GetRemoteFileMd5(remote)
 
 		if l_md5 != "" && r_md5 == l_md5 {
 			return false, nil
 		}
 	}
 
-	r, err := c.SftpClient.Create(remote)
+	r, err := c.sftpClient.Create(remote)
 	if err != nil {
 		return false, err
 	}
@@ -212,10 +225,106 @@ func (c *SFTPCli) Close() (err error) {
 }
 
 func (c *SFTPCli) closeSftp() (err error) {
-	if c.SftpClient != nil {
-		err = c.SftpClient.Close()
-		c.SftpClient = nil
+	if c.sftpClient != nil {
+		err = c.sftpClient.Close()
+		c.sftpClient = nil
 	}
 	return
 }
 
+func (c *SFTPCli) GetDirExists(path string) (base string, toCreate string) {
+	path, _ = sftp.Split(path)
+	ps := strings.Split(path, "/")
+	//fmt.Println(ps)
+	for i := range ps {
+		base = strings.Join(ps[:i + 1], "/")
+		toCreate = strings.Join(ps[i + 1:], "/")
+		//fmt.Printf("base:%s, create:%s\n", base, toCreate)
+		if base == "" {
+			continue
+		}
+		_, err := c.sftpClient.ReadDir(base)
+		if err != nil {
+			base = strings.Join(ps[:i ], "/")
+			toCreate = strings.Join(ps[i:], "/")
+			return
+		}
+	}
+	return
+}
+
+func (c *SFTPCli) CreateDirsRemote(one *task.CopyOneFile, cd string, path string) (err error) {
+	if path == "" {
+		return
+	}
+
+	s := []string{}
+	if one.Become {
+		s = append(s, one.BecomeMethod)
+	}
+	s = append(s,"/bin/sh -c")
+	if cd != "" {
+		s = append(s, "'cd " + cd + " &&")
+	} else {
+		s = append(s, "'")
+	}
+	s = append(s, "mkdir")
+	s = append(s, path)
+	s = append(s, "'")
+
+	fmt.Println(strings.Join(s, " "))
+	err = c.SSHCli.RunCommand(strings.Join(s, " "))
+	one.Result = c.Result
+	return
+
+}
+
+func (c *SFTPCli) ChmodRemote(one *task.CopyOneFile, cd string, path string) (err error) {
+	if path == "" {
+		return
+	}
+
+	s := []string{}
+	if one.Become {
+		s = append(s, one.BecomeMethod)
+	}
+	s = append(s,"/bin/sh -c")
+	if cd != "" {
+		s = append(s, "'cd " + cd + " &&")
+	} else {
+		s = append(s, "'")
+	}
+	s = append(s, "chmod -R")
+	s = append(s, one.DirectoryMode)
+	s = append(s, path)
+	s = append(s, "'")
+
+	fmt.Println(strings.Join(s, " "))
+	err = c.SSHCli.RunCommand(strings.Join(s, " "))
+	return
+}
+
+func (c *SFTPCli) ChownRemote(one *task.CopyOneFile, cd string, path string) (err error) {
+	if path == "" {
+		return
+	}
+
+	s := []string{}
+	if one.Become {
+		s = append(s, one.BecomeMethod)
+	}
+	s = append(s,"/bin/sh -c")
+	if cd != "" {
+		s = append(s, "'cd " + cd + " &&")
+	} else {
+		s = append(s, "'")
+	}
+	s = append(s, "chown -R")
+	s = append(s, one.Owner + ":" + one.Group)
+	s = append(s, path)
+	s = append(s, "'")
+
+	fmt.Println(strings.Join(s, " "))
+	err = c.SSHCli.RunCommand(strings.Join(s, " "))
+	return
+}

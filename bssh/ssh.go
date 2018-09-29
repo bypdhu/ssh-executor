@@ -4,28 +4,17 @@ import (
 	"fmt"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/bypdhu/ssh-executor/result"
+	"github.com/bypdhu/ssh-executor/task"
 )
 
 type SSHCli struct {
 	Cli
-	Session Session
+	Session
+	task.Task
 }
 
 type Session struct {
-	SSHCommand
 	session *ssh.Session
-}
-
-type SSHCommand struct {
-	result.SSHResult
-	Cmd     string
-	Comment string
-	Args    SSHArgs
-}
-
-type SSHArgs struct {
-
 }
 
 func New(ip string, port int, username string, password string) *SSHCli {
@@ -34,18 +23,12 @@ func New(ip string, port int, username string, password string) *SSHCli {
 	cli.Port = port
 	cli.Username = username
 	cli.Password = password
+
 	return cli
 }
 
-func (c *SSHCli) Run(cmd string) (err error) {
-	//fmt.Printf("client:%s\n", c.client)
-	if c.client == nil {
-		if err = c.newClient(); err != nil {
-			return
-		}
-	}
-	//fmt.Printf("session:%s\n", c.session)
-	if c.Session.session == nil {
+func (c *SSHCli) SshRun() (err error) {
+	if c.Session.session == nil || c.client == nil {
 		if err = c.newSession(); err != nil {
 			return
 		}
@@ -53,22 +36,65 @@ func (c *SSHCli) Run(cmd string) (err error) {
 
 	defer c.closeSession()
 
-	c.Session.ExitCode = 0
-	c.Session.Cmd = cmd
-	buf, err := c.Session.session.CombinedOutput(cmd)
+	c.ExitCode = 0
+
+	buf, err := c.Session.session.CombinedOutput(c.Command)
 	if err != nil {
 		if v, ok := err.(*ssh.ExitError); ok {
-			c.Session.ExitCode = v.Waitmsg.ExitStatus()
+			c.ExitCode = v.Waitmsg.ExitStatus()
 		}
-		c.Session.ExitCode = -1
+		c.ExitCode = -1
 	}
-	c.Session.Result = fmt.Sprintf("%s", buf)
+	c.Result = fmt.Sprintf("%s", buf)
 	//c.Session.LastResult = string(buf)
 
 	return
 }
 
+func (c *SSHCli) RunCommand(cmd string) (error) {
+	c.OriginalCommand = cmd
+	_cmd := ""
+	if c.ShellArgs.Become {
+		_cmd += c.ShellArgs.BecomeMethod + " -H -S -n "
+		if c.ShellArgs.BecomeUser != "" {
+			_cmd += "-u " + c.ShellArgs.BecomeUser + " "
+		}
+	}
+	_cmd += "/bin/sh "
+	if c.ShellArgs.Login {
+		_cmd += " --login  "
+	}
+	_cmd += " -c '"
+	_cmd += cmd + "'"
+	c.Command = _cmd
+	return c.SshRun()
+}
+
+func (c *SSHCli) RunCommand2(cmd string, become bool, becomeMethod string, becomeUser string, login bool) (error) {
+	_cmd := ""
+	if become {
+		_cmd += becomeMethod + " -H -S -n "
+		if becomeUser != "" {
+			_cmd += "-u " + becomeMethod + " "
+		}
+	}
+	_cmd += "/bin/sh "
+	if login {
+		_cmd += " --login  "
+	}
+	_cmd += " -c '"
+	_cmd += cmd + "'"
+	c.Command = _cmd
+	return c.SshRun()
+}
+
 func (c *SSHCli) newSession() (err error) {
+	if c.client == nil {
+		if err = c.newClient(); err != nil {
+			return
+		}
+	}
+
 	c.Session.session, err = c.client.NewSession()
 	if err != nil {
 		return
