@@ -18,7 +18,7 @@ import (
 
 var (
 	c *conf.Config
-	results map[string]*result.SSHResult
+	results map[string]*result.BaseResult
 )
 
 func main() {
@@ -49,7 +49,7 @@ func doServer(c *conf.Config) {
 }
 
 func doDirect(c *conf.Config) {
-	results = make(map[string]*result.SSHResult)
+	results = make(map[string]*result.BaseResult)
 
 	hosts := getHosts(c)
 
