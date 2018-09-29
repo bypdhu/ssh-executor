@@ -70,7 +70,7 @@ func (c *SSHCli) RunCommand(cmd string) (error) {
 	return c.SshRun()
 }
 
-func (c *SSHCli) RunCommand2(cmd string, become bool, becomeMethod string, becomeUser string, login bool) (error) {
+func (c *SSHCli) RunCommand2(cmd, becomeMethod, becomeUser string, become, login bool) (error) {
 	_cmd := ""
 	if become {
 		_cmd += becomeMethod + " -H -S -n "
