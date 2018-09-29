@@ -16,3 +16,31 @@ direct:
 
 ssh_config:
   timeout: 30
+  sh: "/bin/sh"
+
+tasks:
+  - name: sss
+    module: shell
+    args:
+      command: "ls"
+      chdir: /tmp
+      login: true
+      become: true
+      become_method: "sudo"
+      become_user: admin
+
+  - name: dafaf
+    module: copy
+    args:
+      copy:
+      - src: "/tmp/foo.yml"
+        dest: "/tmp/bian/foo"
+        owner: foo
+        group: foo
+        mode: 0644
+        create_directory: true  # auto create dir.
+        directory_mode: 0755  # only change new created dir.
+        force: true  # force copy
+      ignore_err: true  # continue copy
+
+

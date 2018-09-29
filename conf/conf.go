@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"git.eju-inc.com/ops/go-common/config"
+	"github.com/bypdhu/ssh-executor/common"
 )
 
 type Config struct {
@@ -41,11 +42,6 @@ type Direct struct {
 	Command   string `yaml:"command"`
 }
 
-const (
-	LAUNCH_SERVER = "server"
-	LAUNCH_DIRECT = "direct"
-)
-
 var (
 	DefaultConfig = Config{
 		Serv:Server{
@@ -53,7 +49,7 @@ var (
 			Telemetry:Telemetry{ListenAddress:"localhost:9889", },
 		},
 		Direct:Direct{},
-		LaunchType:LAUNCH_DIRECT,
+		LaunchType:common.LAUNCH_DIRECT.String(),
 	}
 	cfg *Config
 	mtx sync.RWMutex
