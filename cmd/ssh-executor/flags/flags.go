@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 	"git.eju-inc.com/ops/go-common/version"
 	"git.eju-inc.com/ops/go-common/log"
+	"github.com/bypdhu/ssh-executor/common"
 	"github.com/bypdhu/ssh-executor/conf"
-	"github.com/bypdhu/ssh-executor/module"
 )
 
 type CommandLineFlags struct {
@@ -31,7 +31,7 @@ type CommandLineFlags struct {
 
 func (f *CommandLineFlags) PrintAll() (content string) {
 	switch f.LaunchType {
-	case conf.LAUNCH_SERVER:
+	case common.LAUNCH_SERVER.String():
 		content = fmt.Sprintf(
 			`Flags{
 			config.file=%s,
@@ -47,7 +47,7 @@ func (f *CommandLineFlags) PrintAll() (content string) {
 			f.TelemetryAddress,
 			f.SshTimeout,
 		)
-	case conf.LAUNCH_DIRECT:
+	case common.LAUNCH_DIRECT.String():
 		content = fmt.Sprintf(
 			`Flags{
 			config.file=%s,
@@ -96,7 +96,7 @@ func ParseFlags(args []string) (clfs CommandLineFlags) {
 	a.Flag("config.file", "application's configuration file path.").
 			Default("").Short('c').StringVar(&clfs.ConfigFilePath)
 	a.Flag("launch.type", "server/direct;default direct. server will setup a http server. direct will execute command once.").
-			Default(conf.LAUNCH_DIRECT).Short('T').StringVar(&clfs.LaunchType)
+			Default(common.LAUNCH_DIRECT.String()).Short('T').StringVar(&clfs.LaunchType)
 	a.Flag("ssh.timeout", "timeout in ssh connection. default 30s.").
 			Default("30").Short('t').IntVar(&clfs.SshTimeout)
 	a.Flag("web.listen_address", "[launch.type=server] Address to listen on for UI, API.").
@@ -112,7 +112,7 @@ func ParseFlags(args []string) (clfs CommandLineFlags) {
 	a.Flag("user.pass", "[launch.type=direct] Password for ssh connection.").
 			Default("").Short('p').StringVar(&clfs.Password)
 	a.Flag("module", "[launch.type=direct] Module to handle. like 'shell' 'copy' ").
-			Default(module.MODULE_SHELL).Short('m').StringVar(&clfs.Module)
+			Default(common.MODULE_SHELL.String()).Short('m').StringVar(&clfs.Module)
 	a.Flag("command", "[launch.type=direct] Command to handle.").
 			Default("").Short('C').StringVar(&clfs.Command)
 
