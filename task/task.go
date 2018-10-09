@@ -1,66 +1,71 @@
 package task
 
 import (
+	"strings"
+
 	"github.com/bypdhu/ssh-executor/result"
 	"github.com/bypdhu/ssh-executor/common"
 )
 
 type Task struct {
-	Args
-	Module common.ModuleType
-	Name   string
+	Args            `yaml:"args"`
+	Module  string  `yaml:"module"`
+	Name    string  `yaml:"name"`
+
+	HostDup string
 }
 
 type Args struct {
-	ShellArgs
-	CopyArgs
+	ShellArgs  `yaml:"shell"`
+	CopyArgs   `yaml:"copy"`
 }
 
 type ShellArgs struct {
 	Sudo
 	result.BaseResult
 
-	Command         string
 	OriginalCommand string
-	Chdir           string
-	Login           bool
+
+	Command         string  `yaml:"command"`
+	Chdir           string  `yaml:"chdir"`
+	Login           bool    `yaml:"login"`
 }
 
 type Sudo struct {
-	Become       bool
-	BecomeMethod string
-	BecomeUser   string
+	Become       bool    `yaml:"become"`
+	BecomeMethod string  `yaml:"become_method"`
+	BecomeUser   string  `yaml:"become_user"`
 }
 
 type CopyArgs struct {
-	SftpMode  common.SftpMode
-	CopyFiles []*CopyOneFile
-	IgnoreErr bool // if true, will continue run when copy many files.
+	Sudo
+	SftpMode  string          `yaml:"sftp_mode"`
+	CopyFiles []*CopyOneFile  `yaml:"copy_files"`
+	IgnoreErr bool            `yaml:"ignore_err"` // if true, will continue run when copy many files.
 }
 
 type CopyOneFile struct {
-	Sudo
 	result.BaseResult
 
-	Src             string
-	Dest            string
-	Owner           string
-	Group           string
+	Src             string  `yaml:"src"`
+	Dest            string  `yaml:"dest"`
+	Owner           string  `yaml:"owner"`
+	Group           string  `yaml:"group"`
 	//Mode            os.FileMode
-	Mode            string
-	Md5             string
-	ForceCopy       bool
+	Mode            string  `yaml:"mode"`
+	Md5             string  `yaml:"md5"`
+	ForceCopy       bool    `yaml:"force"`
 
-	CreateDirectory bool
-	Recursive       bool
-	DirectoryMode   string
+	CreateDirectory bool    `yaml:"create_directory"`
+	Recursive       bool    `yaml:"recursive"`
+	DirectoryMode   string  `yaml:"directory_mode"`
 }
 
 func DefaultTask(m common.ModuleType) *Task {
-	switch m {
-	case common.MODULE_SHELL:
+	switch m.String() {
+	case common.MODULE_SHELL.String(), strings.ToLower(common.MODULE_SHELL.String()):
 		return &Task{
-			Module:common.MODULE_SHELL,
+			Module:common.MODULE_SHELL.String(),
 			Name:"shell task",
 			Args:Args{
 				ShellArgs:ShellArgs{
@@ -71,9 +76,9 @@ func DefaultTask(m common.ModuleType) *Task {
 					OriginalCommand:"",
 				}},
 		}
-	case common.MODULE_COPY:
+	case common.MODULE_COPY.String(), strings.ToLower(common.MODULE_COPY.String()):
 		return &Task{
-			Module:common.MODULE_COPY,
+			Module:common.MODULE_COPY.String(),
 			Name:"copy task",
 			Args:Args{
 				CopyArgs:CopyArgs{
@@ -82,7 +87,7 @@ func DefaultTask(m common.ModuleType) *Task {
 		}
 	default:
 		return &Task{
-			Module:common.MODULE_SHELL,
+			Module:common.MODULE_SHELL.String(),
 			Name:"shell task",
 			Args:Args{
 				ShellArgs:ShellArgs{

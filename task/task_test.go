@@ -2,8 +2,9 @@ package task
 
 import (
 	"testing"
-	"github.com/bypdhu/ssh-executor/common"
 	"fmt"
+
+	"github.com/bypdhu/ssh-executor/common"
 )
 
 func TestDefaultTask(t *testing.T) {
