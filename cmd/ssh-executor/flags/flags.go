@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	"github.com/pkg/errors"
+
 	"git.eju-inc.com/ops/go-common/version"
 	"git.eju-inc.com/ops/go-common/log"
+
 	"github.com/bypdhu/ssh-executor/common"
 	"github.com/bypdhu/ssh-executor/conf"
 )
@@ -16,7 +19,7 @@ import (
 type CommandLineFlags struct {
 	ConfigFilePath   string
 	LaunchType       string
-	SshTimeout       int
+	SSHTimeout       int
 
 	WebAddress       string // when LaunchType=server
 	TelemetryAddress string // when LaunchType=server
@@ -31,27 +34,27 @@ type CommandLineFlags struct {
 
 func (f *CommandLineFlags) PrintAll() (content string) {
 	switch f.LaunchType {
-	case common.LAUNCH_SERVER.String():
+	case common.LAUNCH_SERVER.String(), strings.ToLower(common.LAUNCH_SERVER.String()):
 		content = fmt.Sprintf(
 			`Flags{
-			config.file=%s,
 			launch.type=%s,
+			config.file=%s,
 			web.listen_address=%s,
 			telemetry.listen_address=%s,
 			ssh.timeout=%d,
 			}
 			`,
-			f.ConfigFilePath,
 			f.LaunchType,
+			f.ConfigFilePath,
 			f.WebAddress,
 			f.TelemetryAddress,
-			f.SshTimeout,
+			f.SSHTimeout,
 		)
-	case common.LAUNCH_DIRECT.String():
+	case common.LAUNCH_DIRECT.String(), strings.ToLower(common.LAUNCH_DIRECT.String()):
 		content = fmt.Sprintf(
 			`Flags{
-			config.file=%s,
 			launch.type=%s,
+			config.file=%s,
 			hosts=%s,
 			hosts.file=%s,
 			user.name=%s,
@@ -61,26 +64,26 @@ func (f *CommandLineFlags) PrintAll() (content string) {
 			ssh.timeout=%d,
 			}
 			`,
-			f.ConfigFilePath,
 			f.LaunchType,
+			f.ConfigFilePath,
 			f.Hosts,
 			f.HostsFile,
 			f.UserName,
 			f.Module,
 			f.Command,
-			f.SshTimeout,
+			f.SSHTimeout,
 		)
 	default:
 		content = fmt.Sprintf(
 			`Flags{
-			config.file=%s,
 			launch.type=%s,
+			config.file=%s,
 			ssh.timeout=%d,
 			} required launch.type=server or launch.type=direct.
 			`,
-			f.ConfigFilePath,
 			f.LaunchType,
-			f.SshTimeout,
+			f.ConfigFilePath,
+			f.SSHTimeout,
 		)
 	}
 	return
@@ -98,7 +101,7 @@ func ParseFlags(args []string) (clfs CommandLineFlags) {
 	a.Flag("launch.type", "server/direct;default direct. server will setup a http server. direct will execute command once.").
 			Default(common.LAUNCH_DIRECT.String()).Short('T').StringVar(&clfs.LaunchType)
 	a.Flag("ssh.timeout", "timeout in ssh connection. default 30s.").
-			Default("30").Short('t').IntVar(&clfs.SshTimeout)
+			Default("30").Short('t').IntVar(&clfs.SSHTimeout)
 	a.Flag("web.listen_address", "[launch.type=server] Address to listen on for UI, API.").
 			Default("").StringVar(&clfs.WebAddress)
 	a.Flag("telemetry.listen_address", "[launch.type=server] Address to listen on for telemetry.").
@@ -127,10 +130,10 @@ func ParseFlags(args []string) (clfs CommandLineFlags) {
 
 func OverrideConfWithFlags(c *conf.Config, i CommandLineFlags) {
 	c.LaunchType = i.LaunchType
-	c.SSHConfig.Timeout = i.SshTimeout
+	c.SSHConfig.Timeout = i.SSHTimeout
 
 	switch i.LaunchType {
-	case "direct":
+	case common.LAUNCH_DIRECT.String(), strings.ToLower(common.LAUNCH_DIRECT.String()):
 		if i.Hosts != "" {
 			c.Direct.Hosts = i.Hosts
 		}
@@ -149,7 +152,7 @@ func OverrideConfWithFlags(c *conf.Config, i CommandLineFlags) {
 		if i.Command != "" {
 			c.Direct.Command = i.Command
 		}
-	case "server":
+	case common.LAUNCH_SERVER.String(), strings.ToLower(common.LAUNCH_SERVER.String()):
 		if i.WebAddress != "" {
 			c.Serv.Web.ListenAddress = i.WebAddress
 		}
