@@ -3,6 +3,7 @@ package result
 import (
 	"encoding/json"
 	"github.com/bypdhu/ssh-executor/common"
+	"strings"
 )
 
 func (r *SSHResult) ToJson() ([]byte, error) {
@@ -36,13 +37,13 @@ func (r *BaseResult)ToJson(m string) ([]byte, error) {
 	}
 
 	switch m {
-	case common.MODULE_SHELL.String():
+	case common.MODULE_SHELL.String(), strings.ToLower(common.MODULE_SHELL.String()):
 		return json.Marshal(struct {
 			Result   string
 			ExitCode int
 			Err      string
 		}{Result:r.Result, ExitCode:r.ExitCode, Err:e})
-	case common.MODULE_COPY.String():
+	case common.MODULE_COPY.String(), strings.ToLower(common.MODULE_COPY.String()):
 		return json.Marshal(struct {
 			Changed bool
 			Err     string
