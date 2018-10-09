@@ -5,8 +5,8 @@ type ModuleType string
 type SftpMode string
 
 const (
-	LAUNCH_SERVER LaunchType = "server"
-	LAUNCH_DIRECT LaunchType = "direct"
+	LAUNCH_SERVER LaunchType = "SERVER"
+	LAUNCH_DIRECT LaunchType = "DIRECT"
 
 	MODULE_SHELL ModuleType = "SHELL"
 	MODULE_COPY ModuleType = "COPY"
