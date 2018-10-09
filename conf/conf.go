@@ -3,16 +3,25 @@ package conf
 import (
 	"fmt"
 	"sync"
+	"bytes"
+	"encoding/json"
 
 	"git.eju-inc.com/ops/go-common/config"
+
 	"github.com/bypdhu/ssh-executor/common"
+	"github.com/bypdhu/ssh-executor/task"
 )
 
 type Config struct {
-	Serv       Server    `yaml:"server"`
-	Direct     Direct    `yaml:"direct"`
-	LaunchType string    `yaml:"launch_type"`
-	SSHConfig  SSHConfig `yaml:"ssh_config"`
+	LaunchType string        `yaml:"launch_type"`
+
+	Serv       Server        `yaml:"server"`
+
+	Direct     Direct        `yaml:"direct"`
+
+	SSHConfig  SSHConfig     `yaml:"ssh_config"`
+
+	Tasks      []*task.Task  `yaml:"tasks"`
 
 	original   string
 }
@@ -54,6 +63,19 @@ var (
 	cfg *Config
 	mtx sync.RWMutex
 )
+
+func GetCopiedConfigMap(c *Config, hs []string) map[string]*Config {
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(c)
+	cs := make(map[string]*Config, len(hs))
+
+	for _, h := range hs {
+		_c := &Config{}
+		json.NewDecoder(bytes.NewBuffer(buf.Bytes())).Decode(_c)
+		cs[h] = _c
+	}
+	return cs
+}
 
 func Load(configFile string) *Config {
 	mtx.Lock()
