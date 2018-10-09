@@ -2,8 +2,9 @@ package result
 
 import (
 	"encoding/json"
-	"github.com/bypdhu/ssh-executor/common"
 	"strings"
+
+	"github.com/bypdhu/ssh-executor/common"
 )
 
 func (r *SSHResult) ToJson() ([]byte, error) {

@@ -1,7 +1,5 @@
 package result
 
-import "github.com/bypdhu/ssh-executor/common"
-
 type BaseResult struct {
 	SSHResult
 	SFTPResult
@@ -33,7 +31,7 @@ type OneResult struct {
 }
 
 type DirectResult struct {
-	Module  common.ModuleType
+	Module  string
 
 	SSHRes  SSHResult
 	SFTPRes []*SFTPOneResult
