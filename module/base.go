@@ -2,41 +2,47 @@ package module
 
 import (
 	"sync"
+	"strings"
 
-	"github.com/bypdhu/ssh-executor/result"
 	"github.com/bypdhu/ssh-executor/conf"
 	"github.com/bypdhu/ssh-executor/module/shell"
 	"github.com/bypdhu/ssh-executor/common"
+	"github.com/bypdhu/ssh-executor/task"
 )
 
 var (
 	wg sync.WaitGroup
 )
 
-func RunAll(c *conf.Config, hs []string, r map[string]*result.BaseResult) {
+func RunAll(cs map[string]*conf.Config) {
 
-	for _, h := range hs {
-		r[h] = &result.BaseResult{}
-
+	for h, c := range cs {
 		wg.Add(1)
-		switch c.Direct.Module {
-		case common.MODULE_SHELL.String():
-			go runShell(c, h, r[h], &wg)
-		case common.MODULE_COPY.String():
-			go runCopy(c, h, r[h], &wg)
-		default:
-			go runShell(c, h, r[h], &wg)
-		}
+		go runTasks(c, h, &wg)
 	}
 	wg.Wait()
 
 }
 
-func runShell(c *conf.Config, h string, r *result.BaseResult, w *sync.WaitGroup) {
+func runTasks(c *conf.Config, h string, w *sync.WaitGroup) {
 	defer w.Done()
-	shell.Run(c, h, r)
+	for _, t := range c.Tasks {
+		t.HostDup = h
+		switch t.Module  {
+		case common.MODULE_SHELL.String(), strings.ToLower(common.MODULE_SHELL.String()):
+			runShell(c, t)
+		case common.MODULE_COPY.String(), strings.ToLower(common.MODULE_COPY.String()):
+			runCopy(c, t)
+		default:
+			runShell(c, t)
+		}
+	}
 }
 
-func runCopy(c *conf.Config, h string, r *result.BaseResult, w *sync.WaitGroup) {
-	defer w.Done()
+func runShell(c *conf.Config, t *task.Task) {
+	shell.Run(c, t)
 }
+
+func runCopy(c *conf.Config, t *task.Task) {
+}
+
