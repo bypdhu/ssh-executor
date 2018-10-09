@@ -16,3 +16,22 @@ func RemoveDupString(a []string) []string {
 	}
 	return result
 }
+
+// 内置append()函数能够在切片末尾位置添加新的项,
+// 假设要在切片的前面或者中间某位置插入特定项,可以这样实现
+func InsertStringSliceCopy(slice, insertion []string, index int) []string {
+	result := make([]string, len(slice) + len(insertion))
+	at := copy(result, slice[:index])
+	at += copy(result[at:], insertion)
+	copy(result[at:], slice[index:])
+	return result
+}
+
+// 在切片的某位置插入一个元素
+func InsertStringToSlice(slice []string, insert string, index int) []string {
+	result := make([]string, len(slice) + 1)
+	copy(result, slice[:index])
+	result[index] = insert
+	copy(result[index + 1:], slice[index:])
+	return result
+}
