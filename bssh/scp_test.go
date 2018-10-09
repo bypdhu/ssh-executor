@@ -26,7 +26,7 @@ func TestSFTPCli_PullFile(t *testing.T) {
 		{Src:"/tmp/bian/", Dest:cp + "/../tmp/testdir1"},
 	} {
 
-		_ = client.CopyOneFile(common.SFTP_PULL, one)
+		_ = client.CopyOneFile(common.SFTP_PULL.String(), one)
 		fmt.Printf("Change:%s, Error:%s\n", one.Changed, one.Err)
 	}
 
@@ -45,7 +45,7 @@ func TestSFTPCli_PushFile(t *testing.T) {
 		{Src:cp + "/../tmp/config.yml", Dest:"/tmp/bian/config.copy.yml", ForceCopy:true},
 		{Src:cp + "/../tmp/jumpserver.tar.gz", Dest:"/tmp/bian/jumpserver.tar.gz"},
 	} {
-		_ = client.CopyOneFile(common.SFTP_PUSH, one)
+		_ = client.CopyOneFile(common.SFTP_PUSH.String(), one)
 		fmt.Printf("Change:%s, Error:%s\n", one.Changed, one.Err)
 	}
 
@@ -69,7 +69,7 @@ func TestSFTPCli_CopyManyFilesPush(t *testing.T) {
 	client.IgnoreErr = true
 
 	fmt.Printf("%+v\n", client)
-	client.CopyArgs = task.CopyArgs{CopyFiles:srcDests, SftpMode:common.SFTP_PUSH}
+	client.CopyArgs = task.CopyArgs{CopyFiles:srcDests, SftpMode:common.SFTP_PUSH.String()}
 	fmt.Printf("%+v\n", client)
 
 	client.SftpRun()
@@ -96,7 +96,7 @@ func TestSFTPCli_Run_Push(t *testing.T) {
 	client.IgnoreErr = true
 
 	fmt.Printf("%+v\n", client)
-	client.CopyArgs = task.CopyArgs{CopyFiles:srcDests, SftpMode:common.SFTP_PUSH}
+	client.CopyArgs = task.CopyArgs{CopyFiles:srcDests, SftpMode:common.SFTP_PUSH.String()}
 	fmt.Printf("%+v\n", client)
 
 	client.SftpRun()
@@ -122,7 +122,7 @@ func TestSFTPCli_Run_Pull(t *testing.T) {
 	client.IgnoreErr = true
 
 	fmt.Printf("%+v\n", client)
-	client.CopyArgs = task.CopyArgs{CopyFiles:srcDests, SftpMode:common.SFTP_PULL}
+	client.CopyArgs = task.CopyArgs{CopyFiles:srcDests, SftpMode:common.SFTP_PULL.String()}
 	fmt.Printf("%+v\n", client)
 	for _, cf := range client.CopyFiles {
 		fmt.Printf("%+v\n", cf)
@@ -140,7 +140,6 @@ func TestSFTPCli_Run_Push_CreateDir(t *testing.T) {
 	srcDests := []*task.CopyOneFile{{Src:cp + "/../tmp/config.yml",
 		Dest:"/tmp/bian/test1/config.copy.yml",
 		Owner:"admin", Group:"admin", ForceCopy:true,
-		Sudo:task.Sudo{Become:true, BecomeMethod:"sudo"},
 		CreateDirectory:true, DirectoryMode:"777"}}
 
 	username, password := getUser()
@@ -152,7 +151,8 @@ func TestSFTPCli_Run_Push_CreateDir(t *testing.T) {
 
 	fmt.Printf("%+v\n", c)
 	c.CopyArgs.CopyFiles = srcDests
-	c.CopyArgs.SftpMode = common.SFTP_PUSH
+	c.CopyArgs.SftpMode = common.SFTP_PUSH.String()
+	c.CopyArgs.Become = true
 	fmt.Printf("%+v\n", c)
 	for _, i := range c.CopyFiles {
 		fmt.Printf("%+v\n", i)
