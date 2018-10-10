@@ -61,8 +61,8 @@ type CopyOneFile struct {
 	DirectoryMode   string  `yaml:"directory_mode"`
 }
 
-func DefaultTask(m common.ModuleType) *Task {
-	switch m.String() {
+func DefaultTask(m string) *Task {
+	switch m {
 	case common.MODULE_SHELL.String(), strings.ToLower(common.MODULE_SHELL.String()):
 		return &Task{
 			Module:common.MODULE_SHELL.String(),
