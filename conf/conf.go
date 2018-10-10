@@ -24,6 +24,8 @@ type Config struct {
 	Tasks      []*task.Task  `yaml:"tasks"`
 
 	original   string
+
+	HostDup    string
 }
 
 type SSHConfig struct {
@@ -72,6 +74,7 @@ func GetCopiedConfigMap(c *Config, hs []string) map[string]*Config {
 	for _, h := range hs {
 		_c := &Config{}
 		json.NewDecoder(bytes.NewBuffer(buf.Bytes())).Decode(_c)
+		_c.HostDup = h
 		cs[h] = _c
 	}
 	return cs
