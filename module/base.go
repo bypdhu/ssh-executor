@@ -16,18 +16,18 @@ var (
 
 func RunAll(cs map[string]*conf.Config) {
 
-	for h, c := range cs {
+	for _, c := range cs {
 		wg.Add(1)
-		go runTasks(c, h, &wg)
+		go runTasks(c, &wg)
 	}
 	wg.Wait()
 
 }
 
-func runTasks(c *conf.Config, h string, w *sync.WaitGroup) {
+func runTasks(c *conf.Config, w *sync.WaitGroup) {
 	defer w.Done()
 	for _, t := range c.Tasks {
-		t.HostDup = h
+		t.HostDup = c.HostDup
 		switch t.Module  {
 		case common.MODULE_SHELL.String(), strings.ToLower(common.MODULE_SHELL.String()):
 			runShell(c, t)
