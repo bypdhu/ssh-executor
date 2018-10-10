@@ -51,7 +51,7 @@ func doServer(c *conf.Config) {
 
 func doDirect(c *conf.Config) {
 
-	addTask(c)
+	addTaskFromCmd(c)
 
 	hs := conf.GetHosts(c)
 
@@ -67,13 +67,25 @@ func doDirect(c *conf.Config) {
 	}
 }
 
-func addTask(c *conf.Config) {
-	if c.Direct.Command != "" {
-		_t := task.DefaultTask(common.MODULE_SHELL)
-		_t.Command = c.Direct.Command
-		c.Tasks = append(c.Tasks, _t)
-		copy(c.Tasks[1:], c.Tasks[0:len(c.Tasks) - 1])
-		c.Tasks[0] = _t
+func addTaskFromCmd(c *conf.Config) {
+	_t := task.DefaultTask(c.Direct.Module)
+
+	switch c.Direct.Module {
+	case common.MODULE_SHELL.String(), strings.ToLower(common.MODULE_SHELL.String()):
+		if c.Direct.Command != "" {
+			_t.Command = c.Direct.Command
+			c.Tasks = append(c.Tasks, _t)
+			copy(c.Tasks[1:], c.Tasks[0:len(c.Tasks) - 1])
+			c.Tasks[0] = _t
+		}
+	case common.MODULE_COPY.String(), strings.ToLower(common.MODULE_COPY.String()):
+	//	TODO
+	default:
+		if c.Direct.Command != "" {
+			_t.Command = c.Direct.Command
+			c.Tasks = append(c.Tasks, _t)
+			copy(c.Tasks[1:], c.Tasks[0:len(c.Tasks) - 1])
+			c.Tasks[0] = _t		}
 	}
 }
 
