@@ -1,0 +1,54 @@
+{
+  "user_flag": "general",
+  "hosts": [
+    "10.99.70.38",
+    "10.99.70.35"
+  ],
+  "ssh_config": {
+    "timeout": 30,
+    "sh": "/bin/sh"
+  },
+  "tasks": [
+    {
+      "name": "ddd",
+      "module": "shell",
+      "args": {
+        "shell": {
+          "command": "ls",
+          "chdir": "/tmp",
+          "login": true,
+          "become": true,
+          "become_user": "admin",
+          "become_method": "sudo"
+        }
+      }
+    },
+    {
+      "name": "dfafa",
+      "module": "copy",
+      "args": {
+        "copy": {
+          "ignore_err": true,
+          "become": true,
+          "become_user": "admin",
+          "become_method": "sudo",
+          "sftp_mode": "pull",
+          "copy_files": [
+            {
+              "src": "/tmp/foo.yml",
+              "dest": "foo.yml",
+              "owner": "foo",
+              "group": "foo",
+              "mode": 644,
+              "md5": "12313131",
+              "force": true,
+              "create_directory": true,
+              "recursive": true,
+              "directory_mode": 755
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

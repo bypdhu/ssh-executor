@@ -29,7 +29,7 @@ type Config struct {
 }
 
 type SSHConfig struct {
-	Timeout int `yaml:"timeout"`
+	Timeout int `yaml:"timeout" json:"timeout"`
 }
 
 type Server struct {
@@ -40,6 +40,7 @@ type Server struct {
 type Web struct {
 	ListenAddress string `yaml:"listen_address"`
 }
+
 type Telemetry struct {
 	ListenAddress string `yaml:"listen_address"`
 }
