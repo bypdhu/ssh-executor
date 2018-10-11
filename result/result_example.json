@@ -1,0 +1,44 @@
+{
+  "Success": false,
+  "Detail": [
+    {
+      "Host": "1.2.3.4",
+      "Tasks": [
+        {
+          "Name": "dddd",
+          "Module": "shell",
+          "Result": {
+            "Stdout": "sss",
+            "Exitcode": 0
+          },
+          "Err": "dsss",
+          "Success": true
+        },
+        {
+          "Name": "dsfs",
+          "Module": "copy",
+          "sftp_mode": "pull",
+          "copy_files": [
+            {
+              "src": "dfss",
+              "dest": "ddd",
+              "result": {
+                "changed": false,
+                "err": "sss"
+              }
+            },
+            {
+              "src": "dffsss",
+              "dest": "ddfdsfad",
+              "result": {
+                "changed": false,
+                "err": "fdaf"
+              }
+            }
+          ],
+          "success": false
+        }
+      ]
+    }
+  ]
+}
