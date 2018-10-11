@@ -12,7 +12,7 @@ func Run(c *conf.Config, t *task.Task) {
 	//log.Infof("+++++++++now run %s on host %s\n", c.Direct.Command, h)
 	//log.Infof("client is %s", client)
 	t.Err = client.RunCommand(t.Command)
-	t.SSHResult.Result = client.Result
+	t.SSHResult.Stdout = client.Stdout
 	t.SSHResult.ExitCode = client.ExitCode
 
 	//log.Infof("++++++result is %s on host %s\n", result.result, h)
