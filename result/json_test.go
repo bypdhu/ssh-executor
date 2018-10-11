@@ -10,7 +10,7 @@ import (
 
 func TestSSHResult_SSHResultToJson(t *testing.T) {
 	s := &SSHResult{
-		Result:"result ...", ExitCode:-1,
+		Stdout:"result ...", ExitCode:-1,
 	}
 
 	ss, _ := s.ToJson()
@@ -29,7 +29,7 @@ func TestSFTPResult_ToJsonString(t *testing.T) {
 
 func TestBaseResult_ToJsonString(t *testing.T) {
 	s := &BaseResult{
-		SSHResult:SSHResult{Result:"this is result...", ExitCode:-1},
+		SSHResult:SSHResult{Stdout:"this is result...", ExitCode:-1},
 		SFTPResult:SFTPResult{Changed:true},
 		Err:errors.New("This is a err."),
 	}

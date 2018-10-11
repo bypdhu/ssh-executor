@@ -7,6 +7,30 @@ import (
 	"github.com/bypdhu/ssh-executor/common"
 )
 
+func (r *ShellTaskResult) ToJson() ([]byte, error) {
+	return json.Marshal(r)
+}
+
+func (r *ShellTaskResult) ToJsonString() string {
+	s, err := r.ToJson()
+	if err != nil {
+		return ""
+	}
+	return string(s)
+}
+
+func (r *CopyTaskResult) ToJson() ([]byte, error) {
+	return json.Marshal(r)
+}
+
+func (r *CopyTaskResult) ToJsonString() string {
+	s, err := r.ToJson()
+	if err != nil {
+		return ""
+	}
+	return string(s)
+}
+
 func (r *SSHResult) ToJson() ([]byte, error) {
 	return json.Marshal(r)
 }
@@ -43,7 +67,7 @@ func (r *BaseResult)ToJson(m string) ([]byte, error) {
 			Result   string
 			ExitCode int
 			Err      string
-		}{Result:r.Result, ExitCode:r.ExitCode, Err:e})
+		}{Result:r.Stdout, ExitCode:r.ExitCode, Err:e})
 	case common.MODULE_COPY.String(), strings.ToLower(common.MODULE_COPY.String()):
 		return json.Marshal(struct {
 			Changed bool
@@ -54,7 +78,7 @@ func (r *BaseResult)ToJson(m string) ([]byte, error) {
 			Result   string
 			ExitCode int
 			Err      string
-		}{Result:r.Result, ExitCode:r.ExitCode, Err:e})
+		}{Result:r.Stdout, ExitCode:r.ExitCode, Err:e})
 	}
 }
 
