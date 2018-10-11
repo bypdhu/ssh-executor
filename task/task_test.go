@@ -8,10 +8,10 @@ import (
 )
 
 func TestDefaultTask(t *testing.T) {
-	a := DefaultTask(common.MODULE_SHELL)
+	a := DefaultTask(common.MODULE_SHELL.String())
 	fmt.Println(a)
 
-	b := DefaultTask(common.MODULE_COPY)
+	b := DefaultTask(common.MODULE_COPY.String())
 	fmt.Println(b)
 
 }
