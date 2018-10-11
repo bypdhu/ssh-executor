@@ -2,11 +2,13 @@ package conf
 
 import (
 	"strings"
-	"github.com/bypdhu/ssh-executor/utils"
+
 	"git.eju-inc.com/ops/go-common/log"
+
+	"github.com/bypdhu/ssh-executor/utils"
 )
 
-func GetHosts(c *Config) ([]string) {
+func GetHostsFromConfig(c *Config) ([]string) {
 	hosts := strings.Split(c.Direct.Hosts, ",")
 	if c.Direct.HostsFile != "" {
 		hosts_from_file, err := utils.ReadLineNotEmpty(c.Direct.HostsFile)
