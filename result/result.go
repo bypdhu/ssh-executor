@@ -2,13 +2,14 @@ package result
 
 type Result struct {
 	Success bool           `json:"success"`
-	Detail  []*HostResult  `json:"detail"`
 	Msg     string         `json:"msg"`
+	Detail  []*HostResult  `json:"detail"`
 }
 
 type HostResult struct {
-	Host  string        `json:"host"`
-	Tasks []TaskResult  `json:"tasks"`
+	Host    string        `json:"host"`
+	Success bool          `json:"success"`
+	Tasks   []TaskResult  `json:"tasks"`
 }
 
 type TaskResult interface {
