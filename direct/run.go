@@ -16,7 +16,7 @@ var (
 
 func Run(c *conf.Config) {
 
-	addTaskFromCmd(c)
+	modifyConfigFromCmd(c)
 
 	hs := conf.GetHostsFromConfig(c)
 
@@ -35,7 +35,8 @@ func Run(c *conf.Config) {
 	fmt.Printf("%s\n", rs)
 }
 
-func addTaskFromCmd(c *conf.Config) {
+func modifyConfigFromCmd(c *conf.Config) {
+	// 1. add task
 	_t := task.DefaultTask(c.Direct.Module)
 
 	switch c.Direct.Module {

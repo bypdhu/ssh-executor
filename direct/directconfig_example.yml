@@ -9,12 +9,12 @@ server:
 direct:
   hosts: "10.99.70.38,10.99.70.35"
   hosts_file: ""
-  username: "user"
-  password: "pass"
 
 ssh_config:
   timeout: 30
   sh: "/bin/sh"
+  username: "user"
+  password: "pass"
 
 tasks:
   - name: sss
