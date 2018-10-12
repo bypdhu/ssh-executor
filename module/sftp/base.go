@@ -7,7 +7,12 @@ import (
 )
 
 func Run(c *conf.Config, t *task.Task) {
-	client := bssh.NewSftp(t.HostDup, 22, c.SSHConfig.UserName, c.SSHConfig.Password)
+	client, err := bssh.NewSftp(t.HostDup, 22, c.SSHConfig.UserName, c.SSHConfig.Password)
+
+	if err != nil {
+		t.Err = err
+		return
+	}
 
 	client.Task = t
 
