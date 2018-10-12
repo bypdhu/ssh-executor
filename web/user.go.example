@@ -1,0 +1,9 @@
+package web
+
+
+func initUser() {
+	UserMap = make(map[string]users)
+	UserMap["1"] = users{"1", "1"}
+	UserMap["admin"] = users{"admin", "admin"}
+	UserMap["test"] = users{"test", "test"}
+}
