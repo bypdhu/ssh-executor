@@ -8,6 +8,7 @@ import (
 	"github.com/bypdhu/ssh-executor/module/shell"
 	"github.com/bypdhu/ssh-executor/common"
 	"github.com/bypdhu/ssh-executor/task"
+	"github.com/bypdhu/ssh-executor/module/sftp"
 )
 
 var (
@@ -44,5 +45,6 @@ func runShell(c *conf.Config, t *task.Task) {
 }
 
 func runCopy(c *conf.Config, t *task.Task) {
+	sftp.Run(c, t)
 }
 
