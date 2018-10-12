@@ -72,7 +72,7 @@ func TestSFTPCli_CopyManyFilesPush(t *testing.T) {
 	client.CopyArgs = task.CopyArgs{CopyFiles:srcDests, SftpMode:common.SFTP_PUSH.String()}
 	fmt.Printf("%+v\n", client)
 
-	client.SftpRun()
+	client.SftpStart()
 	for _, sd := range srcDests {
 		fmt.Printf("changed:%t, %s\n", sd.Changed, sd.Err)
 	}
@@ -99,7 +99,7 @@ func TestSFTPCli_Run_Push(t *testing.T) {
 	client.CopyArgs = task.CopyArgs{CopyFiles:srcDests, SftpMode:common.SFTP_PUSH.String()}
 	fmt.Printf("%+v\n", client)
 
-	client.SftpRun()
+	client.SftpStart()
 	for _, sd := range srcDests {
 		fmt.Printf("changed:%t, %s\n", sd.Changed, sd.Err)
 	}
@@ -128,7 +128,7 @@ func TestSFTPCli_Run_Pull(t *testing.T) {
 		fmt.Printf("%+v\n", cf)
 	}
 
-	client.SftpRun()
+	client.SftpStart()
 	for _, sd := range srcDests {
 		fmt.Printf("changed:%t, %s\n", sd.Changed, sd.Err)
 	}
@@ -158,7 +158,7 @@ func TestSFTPCli_Run_Push_CreateDir(t *testing.T) {
 		fmt.Printf("%+v\n", i)
 	}
 
-	c.SftpRun()
+	c.SftpStart()
 	for _, sd := range srcDests {
 		fmt.Printf("changed:%t, %s\n", sd.Changed, sd.Err)
 	}

@@ -6,13 +6,13 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type User struct {
+type user struct {
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 }
 
 func getUser() (username string, password string) {
-	var _user User
+	var _user user
 	f, _ := ioutil.ReadFile("../tmp/config.yml")
 
 	err := yaml.Unmarshal(f, &_user)

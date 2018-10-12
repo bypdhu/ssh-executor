@@ -10,7 +10,7 @@ import (
 type SSHCli struct {
 	Cli
 	Session
-	task.Task
+	*task.Task
 }
 
 type Session struct {
@@ -30,6 +30,7 @@ func New(ip string, port int, username string, password string) *SSHCli {
 func (c *SSHCli) SshRun() (err error) {
 	if c.Session.session == nil || c.client == nil {
 		if err = c.newSession(); err != nil {
+			c.Task.Err = err
 			return
 		}
 	}
@@ -42,16 +43,37 @@ func (c *SSHCli) SshRun() (err error) {
 	if err != nil {
 		if v, ok := err.(*ssh.ExitError); ok {
 			c.ExitCode = v.Waitmsg.ExitStatus()
+		} else {
+			c.ExitCode = v.Waitmsg.ExitStatus()
 		}
-		c.ExitCode = -1
 	}
-	c.Result = fmt.Sprintf("%s", buf)
+	c.Stdout = fmt.Sprintf("%s", buf)
 	//c.Session.LastResult = string(buf)
+	c.Task.Err = err
 
 	return
 }
 
-func (c *SSHCli) RunCommand(cmd string) (error) {
+func (c *SSHCli) RunCommandTask() error {
+	c.Task.OriginalCommand = c.Task.Command
+	_cmd := ""
+	if c.ShellArgs.Become {
+		_cmd += c.ShellArgs.BecomeMethod + " -H -S -n "
+		if c.ShellArgs.BecomeUser != "" {
+			_cmd += "-u " + c.ShellArgs.BecomeUser + " "
+		}
+	}
+	_cmd += "/bin/sh "
+	if c.ShellArgs.Login {
+		_cmd += " --login  "
+	}
+	_cmd += " -c '"
+	_cmd += c.Task.Command + "'"
+	c.Command = _cmd
+	return c.SshRun()
+}
+
+func (c *SSHCli) RunCommandDirect(cmd string) (error) {
 	c.OriginalCommand = cmd
 	_cmd := ""
 	if c.ShellArgs.Become {

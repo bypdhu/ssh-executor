@@ -6,12 +6,12 @@ import (
 )
 
 func (c *SSHCli) GetRemoteFileMd5(remote string) (s string, err error) {
-	err = c.RunCommand("md5sum " + remote)
+	err = c.RunCommandDirect("md5sum " + remote)
 	if err != nil {
 		return
 	}
 
-	r := c.Result
+	r := c.Stdout
 	s = strings.Split(r, " ")[0]
 	return
 }

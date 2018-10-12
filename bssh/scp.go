@@ -34,7 +34,7 @@ func NewSftp(ip string, port int, username string, password string) (c *SFTPCli)
 	// SFTPConfig
 	c.BufSize = 1024 * 1024
 
-	c.CopyArgs.BecomeMethod = "sudo"
+	//c.SSHCli.Task.CopyArgs.BecomeMethod = "sudo"
 
 	if err := c.newSftpClient(); err != nil {
 		return
@@ -57,7 +57,7 @@ func (c *SFTPCli) newSftpClient() (err error) {
 	return
 }
 
-func (c *SFTPCli) SftpRun() error {
+func (c *SFTPCli) SftpStart() error {
 	return c.CopyManyFiles()
 }
 
@@ -72,12 +72,15 @@ func (c *SFTPCli) CopyManyFiles() error {
 				errsEntity = append(errsEntity, srcDest)
 				continue
 			}
+			c.BaseResult.Err = err
 			return err
 		}
 	}
 	if len(errsEntity) != 0 {
 		return getErrorFromSrcDest(errsEntity)
 	}
+
+	c.BaseResult.Err = nil
 	return nil
 }
 
@@ -100,9 +103,9 @@ func (c *SFTPCli) CopyOneFile(m string, one *task.CopyOneFile) (err error) {
 	}
 
 	switch m {
-	case common.SFTP_PULL.String():
+	case common.SFTP_PULL.String(), strings.ToLower(common.SFTP_PULL.String()):
 		one.Changed, one.Err = c.PullFile(one)
-	case common.SFTP_PUSH.String():
+	case common.SFTP_PUSH.String(), strings.ToLower(common.SFTP_PUSH.String()):
 		one.Changed, one.Err = c.PushFile(one)
 	}
 	err = one.Err
@@ -121,7 +124,7 @@ func (c *SFTPCli) PullFile(one *task.CopyOneFile) (bool, error) {
 		l_md5, _ := utils.GetMd5FromPath(local)
 		r_md5, err := c.GetRemoteFileMd5(remote)
 		if err != nil {
-			return false, errors.New(err.Error() + ". Detail: " + c.Result)
+			return false, errors.New(err.Error() + ". Detail: " + c.Stdout)
 		}
 		if r_md5 != "" && r_md5 == l_md5 {
 			return false, nil
@@ -275,8 +278,8 @@ func (c *SFTPCli) CreateDirsRemote(t *task.Task, one *task.CopyOneFile, cd strin
 	s = append(s, "'")
 
 	fmt.Println(strings.Join(s, " "))
-	err = c.SSHCli.RunCommand(strings.Join(s, " "))
-	one.Result = c.Result
+	err = c.SSHCli.RunCommandDirect(strings.Join(s, " "))
+	one.Stdout = c.Stdout
 	return
 
 }
@@ -302,7 +305,7 @@ func (c *SFTPCli) ChmodRemote(t *task.Task, one *task.CopyOneFile, cd string, pa
 	s = append(s, "'")
 
 	fmt.Println(strings.Join(s, " "))
-	err = c.SSHCli.RunCommand(strings.Join(s, " "))
+	err = c.SSHCli.RunCommandDirect(strings.Join(s, " "))
 	return
 }
 
@@ -327,6 +330,6 @@ func (c *SFTPCli) ChownRemote(t *task.Task, one *task.CopyOneFile, cd string, pa
 	s = append(s, "'")
 
 	fmt.Println(strings.Join(s, " "))
-	err = c.SSHCli.RunCommand(strings.Join(s, " "))
+	err = c.SSHCli.RunCommandDirect(strings.Join(s, " "))
 	return
 }
