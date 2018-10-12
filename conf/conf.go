@@ -30,8 +30,8 @@ type Config struct {
 
 type SSHConfig struct {
 	Timeout  int    `yaml:"timeout" json:"timeout"`
-	UserName string `yaml:"username"`
-	Password string `yaml:"password"`
+	UserName string `yaml:"username" json:"username"`
+	Password string `yaml:"password" json:"password"`
 }
 
 type Server struct {
