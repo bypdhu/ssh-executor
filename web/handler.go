@@ -3,13 +3,13 @@ package web
 import (
 	"net/http"
 	"encoding/json"
+	"fmt"
 
 	"git.eju-inc.com/ops/go-common/log"
 
 	"github.com/bypdhu/ssh-executor/module"
 	"github.com/bypdhu/ssh-executor/conf"
 	"github.com/bypdhu/ssh-executor/result"
-	"fmt"
 )
 
 var (
@@ -43,11 +43,13 @@ func RunJob(w http.ResponseWriter, r *http.Request) {
 
 	log.Infof("The hosts is:%s\n", wb.Hosts)
 
-	user := UserMap[wb.UserFlag].UserName
-	pass := UserMap[wb.UserFlag].Password
+	if wb.UserFlag != "" {
+		wb.SSHConfig.UserName = UserMap[wb.UserFlag].UserName
+		wb.SSHConfig.Password = UserMap[wb.UserFlag].Password
+	}
+
 	C.Tasks = wb.Tasks
-	wb.SSHConfig.UserName = user
-	wb.SSHConfig.Password = pass
+
 	conf.CopySSHConfig(&wb.SSHConfig, &C.SSHConfig)
 
 	cs = conf.GetCopiedConfigMap(C, wb.Hosts)
