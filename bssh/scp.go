@@ -4,13 +4,14 @@ import (
 	"os"
 	"io"
 	"fmt"
+	"strings"
 
 	"github.com/pkg/sftp"
 	"github.com/pkg/errors"
+
 	"github.com/bypdhu/ssh-executor/utils"
 	"github.com/bypdhu/ssh-executor/common"
 	"github.com/bypdhu/ssh-executor/task"
-	"strings"
 )
 
 // Sftp client
@@ -24,7 +25,7 @@ type SFTPConfig struct {
 	BufSize int
 }
 
-func NewSftp(ip string, port int, username string, password string) (c *SFTPCli) {
+func NewSftp(ip string, port int, username string, password string) (c *SFTPCli, err error) {
 	c = new(SFTPCli)
 	c.Host = ip
 	c.Port = port
@@ -36,7 +37,7 @@ func NewSftp(ip string, port int, username string, password string) (c *SFTPCli)
 
 	//c.SSHCli.Task.CopyArgs.BecomeMethod = "sudo"
 
-	if err := c.newSftpClient(); err != nil {
+	if err = c.newSftpClient(); err != nil {
 		return
 	}
 
@@ -158,18 +159,19 @@ func (c *SFTPCli) PushFile(one *task.CopyOneFile) (bool, error) {
 		return false, errors.New("local: " + local + " is a dir.")
 	}
 
+	// TODO
 	//if one.CreateDirectory {
 	//	base, toCreate := c.GetDirExists(remote)
 	//
 	//	fmt.Printf("base:%s,toCreate:%s\n", base, toCreate)
 	//	if err := c.CreateDirsRemote(one, base, toCreate); err != nil {
-	//		return false, errors.New(err.Error() + ". Detail: " + c.Result)
+	//		return false, errors.New(err.Error() + ". Detail: " + c.Stdout)
 	//	}
 	//	if err := c.ChmodRemote(one, base, toCreate); err != nil {
-	//		return false, errors.New(err.Error() + ". Detail: " + c.Result)
+	//		return false, errors.New(err.Error() + ". Detail: " + c.Stdout)
 	//	}
 	//	if err := c.ChownRemote(one, base, toCreate); err != nil {
-	//		return false, errors.New(err.Error() + ". Detail: " + c.Result)
+	//		return false, errors.New(err.Error() + ". Detail: " + c.Stdout)
 	//	}
 	//}
 
@@ -258,14 +260,14 @@ func (c *SFTPCli) GetDirExists(path string) (base string, toCreate string) {
 	return
 }
 
-func (c *SFTPCli) CreateDirsRemote(t *task.Task, one *task.CopyOneFile, cd string, path string) (err error) {
+func (c *SFTPCli) CreateDirsRemote(one *task.CopyOneFile, cd string, path string) (err error) {
 	if path == "" {
 		return
 	}
 
 	s := []string{}
-	if t.CopyArgs.Become {
-		s = append(s, t.CopyArgs.BecomeMethod)
+	if c.Task.CopyArgs.Become {
+		s = append(s, c.Task.CopyArgs.BecomeMethod)
 	}
 	s = append(s, "/bin/sh -c")
 	if cd != "" {
@@ -284,14 +286,14 @@ func (c *SFTPCli) CreateDirsRemote(t *task.Task, one *task.CopyOneFile, cd strin
 
 }
 
-func (c *SFTPCli) ChmodRemote(t *task.Task, one *task.CopyOneFile, cd string, path string) (err error) {
+func (c *SFTPCli) ChmodRemote(one *task.CopyOneFile, cd string, path string) (err error) {
 	if path == "" {
 		return
 	}
 
 	s := []string{}
-	if t.CopyArgs.Become {
-		s = append(s, t.CopyArgs.BecomeMethod)
+	if c.Task.CopyArgs.Become {
+		s = append(s, c.Task.CopyArgs.BecomeMethod)
 	}
 	s = append(s, "/bin/sh -c")
 	if cd != "" {
@@ -309,14 +311,14 @@ func (c *SFTPCli) ChmodRemote(t *task.Task, one *task.CopyOneFile, cd string, pa
 	return
 }
 
-func (c *SFTPCli) ChownRemote(t *task.Task, one *task.CopyOneFile, cd string, path string) (err error) {
+func (c *SFTPCli) ChownRemote(one *task.CopyOneFile, cd string, path string) (err error) {
 	if path == "" {
 		return
 	}
 
 	s := []string{}
-	if t.CopyArgs.Become {
-		s = append(s, t.CopyArgs.BecomeMethod)
+	if c.Task.CopyArgs.Become {
+		s = append(s, c.Task.CopyArgs.BecomeMethod)
 	}
 	s = append(s, "/bin/sh -c")
 	if cd != "" {
