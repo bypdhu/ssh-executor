@@ -6,7 +6,9 @@
   ],
   "ssh_config": {
     "timeout": 30,
-    "sh": "/bin/sh"
+    "sh": "/bin/sh",
+    "username": "user",
+    "password": "pass"
   },
   "tasks": [
     {
