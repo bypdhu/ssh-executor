@@ -1,4 +1,4 @@
-launch_type: "server"
+launch_type: "direct"
 
 server:
   web:
@@ -6,12 +6,53 @@ server:
   telemetry:
     listen_address: "localhost:9889"
 
-#direct:
-#  hosts: "10.99.70.38,10.99.70.35"
-#  hosts_file:
-#  username: "user"
-#  password: "pass"
-#  command: "pwd"
+direct:
+  hosts: "10.99.70.38,10.99.70.35"
+  hosts_file: ""
 
 ssh_config:
   timeout: 30
+  sh: "/bin/sh"
+  username: "admin"
+  password: "admin"
+
+tasks:
+  - name: sss
+    module: shell
+    args:
+      shell:
+        command: "ls"
+        chdir: /tmp
+        login: true
+        become: true
+        become_method: "sudo"
+        become_user: admin
+
+  - name: dafaf
+    module: copy
+    args:
+      copy:
+        ignore_err: true  # continue copy
+        become: true
+        become_method: "sudo"
+        become_user: admin
+        sftp_mode: push
+        copy_files:
+          - src: "foo.yml"
+            dest: "foo.yml"
+            owner: admin
+            group: admin
+            mode: 0644
+            force: true  # force copy
+            create_directory: true  # auto create dir.
+            recursive: true
+            directory_mode: 0755  # only change new created dir.
+
+          - src: "/tmp/foo.yml"
+            dest: "/tmp/bian/foo.yml"
+            owner: foo
+            group: foo
+            mode: 0644
+            create_directory: true
+            directory_mode: 0755
+            force: true
