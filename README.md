@@ -25,32 +25,23 @@
     ssh-executor
     
     Flags:
-      -h, --help                   Show context-sensitive help (also try --help-long
-                                   and --help-man).
+      -h, --help                   Show context-sensitive help (also try --help-long and --help-man).
           --version                Show application version.
-          --log.level="info"       Only log messages with the given severity or
-                                   above. Valid levels: [debug, info, warn, error,
-                                   fatal]
-          --log.format="logger:stderr"
-                                   Set the log target and format. Example:
-                                   "logger:syslog?appname=bob&local=7" or
-                                   "logger:stdout?json=true"
+          --log.level="info"       Only log messages with the given severity or above. Valid levels: [debug, info, warn, error, fatal]
+          --log.format="logger:stderr"  
+                                   Set the log target and format. Example: "logger:syslog?appname=bob&local=7" or "logger:stdout?json=true"
       -c, --config.file=""         application's configuration file path.
-      -T, --launch.type="direct"   server/direct;default direct. server will setup a
-                                   http server. direct will execute command once.
+      -T, --launch.type="DIRECT"   server/direct;default direct. server will setup a http server. direct will execute command once.
       -t, --ssh.timeout=30         timeout in ssh connection. default 30s.
-          --web.listen_address=""  [launch.type=server] Address to listen on for UI,
-                                   API.
-          --telemetry.listen_address=""
-                                   [launch.type=server] Address to listen on for
-                                   telemetry.
-      -i, --hosts=""               [launch.type=direct] Hosts to connect by ssh.
-                                   Combined by ','. Add hosts.file.
-      -f, --hosts.file=""          [launch.type=direct] File of hosts to connect by
-                                   ssh. One ip on line. Add hosts.
+      -a, --web.listen_address=""  [launch.type=server] Address to listen on for UI, API.
+          --telemetry.listen_address=""  
+                                   [launch.type=server] Address to listen on for telemetry.
+      -i, --hosts=""               [launch.type=direct] Hosts to connect by ssh. Combined by ','. Add hosts.file.
+      -f, --hosts.file=""          [launch.type=direct] File of hosts to connect by ssh. One ip on line. Add hosts.
       -u, --user.name=""           [launch.type=direct] Username for ssh connection.
       -p, --user.pass=""           [launch.type=direct] Password for ssh connection.
-      -C, --command=""             [launch.type=direct] Command for ssh connection.
+      -m, --module="SHELL"         [launch.type=direct] Module to handle. like 'shell' 'copy'
+      -C, --command=""             [launch.type=direct] Command to handle.
 
 ### 3. 启动举例
 
@@ -83,6 +74,11 @@
 
 ### 1. 一次性启动使用
 
+#### 1.1 简单命令调用
+    ./ssh-executor -i 10.99.70.35,10.99.70.38 -u user -p pass -C "/bin/sh --login -c 'ifconfig'"
+
+#### 1.2 使用yaml文件执行task
+
 ### 2. 作为服务启动调用
 
 #### 2.1 执行shell和copy任务
@@ -94,7 +90,7 @@ Content-Type: application/json
 ```
 ```json
 {
-  "user_flag": "general",
+  "user_flag": "test",
   "hosts": [
     "10.99.70.38",
     "10.99.70.35"
