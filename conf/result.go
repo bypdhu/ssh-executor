@@ -37,7 +37,7 @@ func GenerateResult(cs map[string]*Config) result.Result {
 	hostResults := []*result.HostResult{}
 
 	for h, c := range cs {
-		hr := &result.HostResult{}
+		hr := &result.HostResult{Success:true}
 		hr.Host = h
 		for _, t := range c.Tasks {
 			switch t.Module {
@@ -46,6 +46,7 @@ func GenerateResult(cs map[string]*Config) result.Result {
 				e := ""
 				if t.ShellArgs.SSHResult.ExitCode != 0 || t.BaseResult.Err != nil {
 					s = false
+					hr.Success = false
 					results.Success = false
 					if t.BaseResult.Err != nil {
 						e = t.BaseResult.Err.Error()
@@ -65,6 +66,7 @@ func GenerateResult(cs map[string]*Config) result.Result {
 					if i.BaseResult.Err != nil {
 						e = i.Err.Error()
 						s = false
+						hr.Success = false
 						results.Success = false
 					}
 					copyFile := result.CopyOneFileResult{Src:i.Src, Dest:i.Dest, Result:i.SFTPResult, Err:e}
@@ -75,13 +77,21 @@ func GenerateResult(cs map[string]*Config) result.Result {
 				}
 				hr.Tasks = append(hr.Tasks, tr)
 			default:
-				s := t.ShellArgs.SSHResult.ExitCode == 0 && t.BaseResult.Err == nil
+				s := true
 				e := ""
-				if t.Err != nil {
-					e = t.Err.Error()
+				if t.ShellArgs.SSHResult.ExitCode != 0 || t.BaseResult.Err != nil {
+					s = false
+					hr.Success = false
+					results.Success = false
+					if t.BaseResult.Err != nil {
+						e = t.BaseResult.Err.Error()
+					}
 				}
+
 				tr := result.ShellTaskResult{
-					Name:t.Name, Module:t.Module, Result:t.SSHResult, Err:e, Success:s}
+					Name:t.Name, Module:t.Module, Result:result.SSHResult{
+						Stdout:t.SSHResult.Stdout, ExitCode:t.SSHResult.ExitCode,
+					}, Err:e, Success:s}
 				hr.Tasks = append(hr.Tasks, tr)
 			}
 		}

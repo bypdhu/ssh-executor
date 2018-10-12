@@ -22,3 +22,11 @@ func GetHostsFromConfig(c *Config) ([]string) {
 
 	return hosts
 }
+
+func CopySSHConfig(from, to *SSHConfig) {
+	if from.Timeout != 0 {
+		to.Timeout = from.Timeout
+	}
+	to.UserName = from.UserName
+	to.Password = from.Password
+}

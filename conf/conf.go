@@ -29,7 +29,9 @@ type Config struct {
 }
 
 type SSHConfig struct {
-	Timeout int `yaml:"timeout" json:"timeout"`
+	Timeout  int    `yaml:"timeout" json:"timeout"`
+	UserName string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 type Server struct {
@@ -48,8 +50,6 @@ type Telemetry struct {
 type Direct struct {
 	Hosts     string `yaml:"hosts"` // separate by ","
 	HostsFile string `yaml:"hosts_file"`
-	UserName  string `yaml:"username"`
-	Password  string `yaml:"password"`
 	Module    string `yaml:"module"`
 	Command   string `yaml:"command"`
 }
@@ -109,13 +109,16 @@ func (s Server) String() string {
 	return fmt.Sprintf("{Web:%s,Telemetry:%s}", s.Web, s.Telemetry)
 }
 func (d Direct) String() string {
-	return fmt.Sprintf("{Hosts:%s,HostsFile:%s,UserName:%s,Password:%s,Command:%s}", d.Hosts, d.HostsFile, d.UserName, d.Password, d.Command)
+	return fmt.Sprintf("{Hosts:%s,HostsFile:%s,Command:%s}", d.Hosts, d.HostsFile, d.Command)
 }
 func (d Direct) StringSecure() string {
-	return fmt.Sprintf("{Hosts:%s,HostsFile:%s,UserName:%s,Password:***,Command:%s}", d.Hosts, d.HostsFile, d.UserName, d.Command)
+	return fmt.Sprintf("{Hosts:%s,HostsFile:%s,Command:%s}", d.Hosts, d.HostsFile, d.Command)
 }
 func (s SSHConfig) String() string {
-	return fmt.Sprintf("{Timeout:%s}", s.Timeout)
+	return fmt.Sprintf("{Timeout:%s,UserName:%s,Password:%s}", s.Timeout, s.UserName, s.Password)
+}
+func (s SSHConfig) StringSecure() string {
+	return fmt.Sprintf("{Timeout:%s,UserName:%s,Password:***}", s.Timeout, s.UserName)
 }
 func (c Config) String() string {
 	return fmt.Sprintf("{LaunchType:%s,Server:%s,Direct:%s,SSHConfig:%s}", c.LaunchType, c.Serv, c.Direct, c.SSHConfig)
