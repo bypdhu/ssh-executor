@@ -23,8 +23,8 @@ type ShellTaskResult struct {
 	Name    string     `json:"name"`
 	Module  string     `json:"module"`
 	Success bool       `json:"success"`
-	Result  SSHResult  `json:"result"`
 	Err     string     `json:"err"`
+	Result  SSHResult  `json:"result"`
 }
 
 type CopyTaskResult struct {
@@ -32,14 +32,15 @@ type CopyTaskResult struct {
 	Module    string               `json:"module"`
 	SftpMode  string               `json:"sftpmode"`
 	Success   bool                 `json:"success"`
+	Err       string               `json:"err"`
 	CopyFiles []CopyOneFileResult  `json:"copyfiles"`
 }
 
 type CopyOneFileResult struct {
 	Src    string      `json:"src"`
 	Dest   string      `json:"dest"`
-	Result SFTPResult  `json:"result"`
 	Err    string      `json:"err"`
+	Result SFTPResult  `json:"result"`
 }
 
 type BaseResult struct {
