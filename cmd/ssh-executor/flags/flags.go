@@ -19,15 +19,16 @@ import (
 type CommandLineFlags struct {
 	ConfigFilePath   string
 	LaunchType       string
+
 	SSHTimeout       int
+	UserName         string
+	Password         string
 
 	WebAddress       string // when LaunchType=server
 	TelemetryAddress string // when LaunchType=server
 
 	Hosts            string // when LaunchType=direct. separate by ","
 	HostsFile        string // when LaunchType=direct. One Ip on line.
-	UserName         string // when LaunchType=direct.
-	Password         string // when LaunchType=direct.
 	Module           string // when LaunchType=direct.
 	Command          string // when LaunchType=direct.
 }
@@ -141,10 +142,10 @@ func OverrideConfWithFlags(c *conf.Config, i CommandLineFlags) {
 			c.Direct.HostsFile = i.HostsFile
 		}
 		if i.UserName != "" {
-			c.Direct.UserName = i.UserName
+			c.SSHConfig.UserName = i.UserName
 		}
 		if i.Password != "" {
-			c.Direct.Password = i.Password
+			c.SSHConfig.Password = i.Password
 		}
 		if i.Module != "" {
 			c.Direct.Module = i.Module
