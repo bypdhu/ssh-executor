@@ -33,7 +33,7 @@ func GenerateResultToJson(cs map[string]*Config) ([]byte, error) {
 }
 
 func GenerateResult(cs map[string]*Config) result.Result {
-	results := result.Result{Success:true}
+	results := result.Result{}
 	hostResults := []*result.HostResult{}
 
 	for h, c := range cs {
@@ -60,7 +60,12 @@ func GenerateResult(cs map[string]*Config) result.Result {
 				hr.Tasks = append(hr.Tasks, tr)
 			case common.MODULE_COPY.String(), strings.ToLower(common.MODULE_COPY.String()):
 				cr := []result.CopyOneFileResult{}
+				taskErr := ""
 				s := true
+				if t.Err != nil {
+					taskErr = t.Err.Error()
+					s = false
+				}
 				for _, i := range t.CopyFiles {
 					e := ""
 					if i.BaseResult.Err != nil {
@@ -72,8 +77,9 @@ func GenerateResult(cs map[string]*Config) result.Result {
 					copyFile := result.CopyOneFileResult{Src:i.Src, Dest:i.Dest, Result:i.SFTPResult, Err:e}
 					cr = append(cr, copyFile)
 				}
+
 				tr := result.CopyTaskResult{
-					Name:t.Name, Module:t.Module, Success:s, SftpMode:t.SftpMode, CopyFiles:cr,
+					Name:t.Name, Module:t.Module, Success:s, SftpMode:t.SftpMode, CopyFiles:cr, Err:taskErr,
 				}
 				hr.Tasks = append(hr.Tasks, tr)
 			default:
