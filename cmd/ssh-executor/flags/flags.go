@@ -131,7 +131,16 @@ func ParseFlags(args []string) (clfs CommandLineFlags) {
 
 func OverrideConfWithFlags(c *conf.Config, i CommandLineFlags) {
 	c.LaunchType = i.LaunchType
-	c.SSHConfig.Timeout = i.SSHTimeout
+
+	if i.SSHTimeout != 0 {
+		c.SSHConfig.Timeout = i.SSHTimeout
+	}
+	if i.UserName != "" {
+		c.SSHConfig.UserName = i.UserName
+	}
+	if i.Password != "" {
+		c.SSHConfig.Password = i.Password
+	}
 
 	switch i.LaunchType {
 	case common.LAUNCH_DIRECT.String(), strings.ToLower(common.LAUNCH_DIRECT.String()):
@@ -140,12 +149,6 @@ func OverrideConfWithFlags(c *conf.Config, i CommandLineFlags) {
 		}
 		if i.HostsFile != "" {
 			c.Direct.HostsFile = i.HostsFile
-		}
-		if i.UserName != "" {
-			c.SSHConfig.UserName = i.UserName
-		}
-		if i.Password != "" {
-			c.SSHConfig.Password = i.Password
 		}
 		if i.Module != "" {
 			c.Direct.Module = i.Module
