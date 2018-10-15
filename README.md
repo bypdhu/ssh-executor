@@ -2,7 +2,8 @@
 
 | Date      | Version | Owner | Comments    |
 | --------- | ------- | ----- | ----------- |
-| 2018.10.12 | v1.0.0 | bian  | Created it. |
+| 2018.10.12 | v0.9.0 | bian  | Created it. |
+| 2018.10.15 | v1.0.0 | bian  | Release. |
 |           |         |       |             |
 
 ## 一、简介
