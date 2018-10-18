@@ -5,6 +5,16 @@ server:
     listen_address: "localhost:9888"
   telemetry:
     listen_address: "localhost:9889"
+  users:
+    - type: 1
+      username: 1
+      password: 1
+    - type: 2
+      username: 2
+      password: 2
+    - type: test
+      username: "test"
+      password: "test"
 
 direct:
   hosts: "10.99.70.38,10.99.70.35"

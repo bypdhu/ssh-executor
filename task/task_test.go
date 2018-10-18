@@ -1,17 +1,17 @@
 package task
 
 import (
-	"testing"
-	"fmt"
+    "testing"
+    "fmt"
 
-	"github.com/bypdhu/ssh-executor/common"
+    "github.com/bypdhu/ssh-executor/common"
 )
 
 func TestDefaultTask(t *testing.T) {
-	a := DefaultTask(common.MODULE_SHELL.String())
-	fmt.Println(a)
+    a := DefaultTask(common.MODULE_SHELL.String())
+    fmt.Println(a)
 
-	b := DefaultTask(common.MODULE_COPY.String())
-	fmt.Println(b)
+    b := DefaultTask(common.MODULE_COPY.String())
+    fmt.Println(b)
 
 }

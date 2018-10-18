@@ -1,84 +1,84 @@
 package web
 
 import (
-	"net/http"
-	"encoding/json"
-	"fmt"
+    "net/http"
+    "encoding/json"
+    "fmt"
 
-	"git.eju-inc.com/ops/go-common/log"
+    "git.eju-inc.com/ops/go-common/log"
 
-	"github.com/bypdhu/ssh-executor/module"
-	"github.com/bypdhu/ssh-executor/conf"
-	"github.com/bypdhu/ssh-executor/result"
+    "github.com/bypdhu/ssh-executor/module"
+    "github.com/bypdhu/ssh-executor/conf"
+    "github.com/bypdhu/ssh-executor/result"
 )
 
 var (
-	cs map[string]*conf.Config
+    cs map[string]*conf.Config
 )
 
 func RunJob(w http.ResponseWriter, r *http.Request) {
 
-	log.Infof("Now Run Job.\n")
+    log.Infof("Now Run Job.\n")
 
-	defer r.Body.Close()
-	buf := make([]byte, 1024)
-	var content string
-	for {
-		n, err := r.Body.Read(buf)
-		content += string(buf[:n])
-		if err != nil {
-			break
-		}
-	}
+    defer r.Body.Close()
+    buf := make([]byte, 1024)
+    var content string
+    for {
+        n, err := r.Body.Read(buf)
+        content += string(buf[:n])
+        if err != nil {
+            break
+        }
+    }
 
-	log.Infof("The request body is:%s\n", content)
+    log.Infof("The request body is:%s\n", content)
 
-	wb := &WebBody{}
+    wb := &WebBody{}
 
-	err := json.Unmarshal([]byte(content), wb)
-	if err != nil {
-		buildNewResponse(w, 500, result.Result{Success:false, Msg:err.Error()})
-		return
-	}
+    err := json.Unmarshal([]byte(content), wb)
+    if err != nil {
+        buildNewResponse(w, 500, result.Result{Success:false, Msg:err.Error()})
+        return
+    }
 
-	log.Infof("The hosts is:%s\n", wb.Hosts)
+    log.Infof("The hosts is:%s\n", wb.Hosts)
 
-	if wb.UserFlag != "" {
-		wb.SSHConfig.UserName = UserMap[wb.UserFlag].UserName
-		wb.SSHConfig.Password = UserMap[wb.UserFlag].Password
-	}
+    if wb.UserFlag != "" {
+        wb.SSHConfig.UserName = UserMap[wb.UserFlag].UserName
+        wb.SSHConfig.Password = UserMap[wb.UserFlag].Password
+    }
 
-	C.Tasks = wb.Tasks
+    C.Tasks = wb.Tasks
 
-	conf.CopySSHConfig(&wb.SSHConfig, &C.SSHConfig)
+    conf.CopySSHConfig(&wb.SSHConfig, &C.SSHConfig)
 
-	cs = conf.GetCopiedConfigMap(C, wb.Hosts)
+    cs = conf.GetCopiedConfigMap(C, wb.Hosts)
 
-	module.RunAll(cs)
+    module.RunAll(cs)
 
-	buildNewResponse(w, 200, conf.GenerateResult(cs))
+    buildNewResponse(w, 200, conf.GenerateResult(cs))
 }
 
 func buildNewResponse(w http.ResponseWriter, code int, result result.Result) {
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(code)
 
-	formatRes, err := json.Marshal(result)
+    formatRes, err := json.Marshal(result)
 
-	if err != nil {
-		log.Errorf("Failed to format response str, err is %s", err)
-		errByte := []byte(fmt.Sprintf(`{"msg":"%s"}`, err))
-		w.Write(errByte)
-		return
-	}
+    if err != nil {
+        log.Errorf("Failed to format response str, err is %s", err)
+        errByte := []byte(fmt.Sprintf(`{"msg":"%s"}`, err))
+        w.Write(errByte)
+        return
+    }
 
-	w.Write(formatRes)
+    w.Write(formatRes)
 }
 
 func Hello(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write([]byte(fmt.Sprintf(`{"msg":"%s"}`, "hello world.")))
-	return
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(200)
+    w.Write([]byte(fmt.Sprintf(`{"msg":"%s"}`, "hello world.")))
+    return
 }
