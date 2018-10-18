@@ -91,7 +91,7 @@ Content-Type: application/json
 ```
 ```json
 {
-  "user_flag": "test",
+  "user_flag": "test", //用户名和密码的标示。程序打包或者启动时带入。建议使用此项。
   "hosts": [
     "10.99.70.38",
     "10.99.70.35"
@@ -99,7 +99,7 @@ Content-Type: application/json
   "ssh_config": {
     "timeout": 30,
     "sh": "/bin/sh",
-    "username": "user",
+    "username": "user", //调用时传入，否则使用user_flag指代对象
     "password": "pass"
   },
   "tasks": [
@@ -108,7 +108,7 @@ Content-Type: application/json
       "module": "shell",
       "args": {
         "shell": {
-          "command": "ls",
+          "command": "ls", // 最终执行命令: sudo -H -S -n -u admin --login -c 'ls'
           "chdir": "/tmp",
           "login": true,
           "become": true,
@@ -213,6 +213,51 @@ Content-Type: application/json
 }
 ```
 
+### 3. 说明
+
+#### 3.1 ssh使用的用户名密码调用顺序
+
+- direct:
+    - 命令行输入用户名、密码优先级最高
+    - 其次为配置文件中ssh_config中配置的username和password
+- server:
+    - 用户输入参数中user_flag表示的用户名和密码，优先级最高
+    - 其次为用户输入参数中ssh_config中配置的username和password
+    - 再其次同上，和direct相同的配置
+
+#### 3.2 user_flag表示的用户名密码来源
+来自启动时的配置文件和程序打包时的文件web/user.go。配置文件的内容会添加或覆盖程序中打包的内容。
+- 配置文件中变量为server.users，参考 [!bypdhu](conf/config_example.yml)
+ ```yaml
+server:
+  users:
+    - type: abc
+      username: a
+      password: a
+    - type: test
+      username: "test"
+      password: "test"
+```
+- web/user.go文件可以从web/user.go.example复制修改。
+```go
+package web
+
+func initUser() {
+	UserMap = make(map[string]users)
+	UserMap["1"] = users{"1", "1"}
+	UserMap["admin"] = users{"admin", "admin"}
+	UserMap["test"] = users{"test", "test"}
+}
+
+```
+
+## 四、开发
+
+### 1. 开发环境
+
+#### 文件修改
+需要将web/user.go.example复制到user.go，并且将需要的user_flag对应的用户名密码填入。
+目前支持的user_flag包括： release/compare/software/loggrep/vpnmanage/dnsmanage
 
 ## 更新历史
 
