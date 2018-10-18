@@ -4,7 +4,7 @@
 | --------- | ------- | ----- | ----------- |
 | 2018.10.12 | v0.9.0 | bian  | Created it. |
 | 2018.10.15 | v1.0.0 | bian  | Release. |
-|           |         |       |             |
+| 2018.10.18 | v1.0.1 | bian  | Get users from config for server. |
 
 ## 一、简介
 使用go语言实现的ssh命令执行器。
@@ -269,3 +269,6 @@ func initUser() {
 - 功能模块
     - shell: 直接执行shell命令
     - copy: 远程copy文件
+    
+### v1.0.1
+- 作为server启动时，支持配置文件中配置用户名密码，根据用户类型调用。
