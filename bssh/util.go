@@ -1,23 +1,23 @@
 package bssh
 
 import (
-	"strings"
-	"os"
+    "strings"
+    "os"
 )
 
 func (c *SSHCli) GetRemoteFileMd5(remote string) (s string, err error) {
-	err = c.RunCommandDirect("md5sum " + remote)
-	if err != nil {
-		return
-	}
+    err = c.RunCommandDirect("md5sum " + remote)
+    if err != nil {
+        return
+    }
 
-	r := c.Stdout
-	s = strings.Split(r, " ")[0]
-	return
+    r := c.Stdout
+    s = strings.Split(r, " ")[0]
+    return
 }
 
 func (c *SSHCli) ChmodDirRemote(cd string, path string, mode os.FileMode) (err error) {
-	return
+    return
 }
 
 
