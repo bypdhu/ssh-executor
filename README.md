@@ -71,6 +71,12 @@
 
     ./ssh-executor -T server -a localhost:9888
     
+#### 3.3 调用配置文件启动
+    
+    ./ssh-executor -c config.yml
+完整配置文件参考 [config_example.yml](conf/config_example.yml)
+
+    
 ## 三、使用
 
 ### 1. 一次性启动使用
@@ -227,7 +233,7 @@ Content-Type: application/json
 
 #### 3.2 user_flag表示的用户名密码来源
 来自启动时的配置文件和程序打包时的文件web/user.go。配置文件的内容会添加或覆盖程序中打包的内容。
-- 配置文件中变量为server.users，参考 [!bypdhu](conf/config_example.yml)
+- 配置文件中变量为server.users，如下，
  ```yaml
 server:
   users:
