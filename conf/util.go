@@ -27,7 +27,7 @@ func CopySSHConfig(from, to *SSHConfig) {
     if from.Timeout != 0 {
         to.Timeout = from.Timeout
     }
-    if to.UserName != nil {
+    if from.UserName != "" {
         to.UserName = from.UserName
         to.Password = from.Password
     }
