@@ -44,8 +44,10 @@ func RunJob(w http.ResponseWriter, r *http.Request) {
     log.Infof("The hosts is:%s\n", wb.Hosts)
 
     if wb.UserFlag != "" {
-        wb.SSHConfig.UserName = UserMap[wb.UserFlag].UserName
-        wb.SSHConfig.Password = UserMap[wb.UserFlag].Password
+        if _, ok := UserMap[wb.UserFlag]; ok {
+            wb.SSHConfig.UserName = UserMap[wb.UserFlag].UserName
+            wb.SSHConfig.Password = UserMap[wb.UserFlag].Password
+        }
     }
 
     C.Tasks = wb.Tasks
